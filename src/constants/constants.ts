@@ -1,0 +1,3 @@
+export const CANCELED_RESERVATION_EMITTER_MESSAGE = "CANCELED_RESERVATION";
+export const ngrok = "https://35d2-197-166-236-239.ngrok-free.app"
+export const SLOT_STATUS_CHANGED_MESSAGE = "SLOT_STATUS_CHANGED"

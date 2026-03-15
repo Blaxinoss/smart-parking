@@ -14,7 +14,7 @@ export default function EditScreenInfo({ path }: { path: string }) {
         <View className="w-full p-6 my-6 rounded-3xl border-4 bg-red-500 border-red-500 dark:bg-blue-900 dark:border-blue-400 items-center justify-center">
 
           {/* نص العنوان */}
-          <Text className="text-2xl font- font-bold text-red-900 dark:text-blue-50">
+          <Text className="text-2xl font- font-bold text-red-900 dark:text-blue-500">
             NativeWind Test
           </Text>
 
@@ -74,6 +74,7 @@ const styles = StyleSheet.create({
     fontSize: 17,
     lineHeight: 24,
     textAlign: 'center',
+    color: 'white'
   },
   helpContainer: {
     marginTop: 15,

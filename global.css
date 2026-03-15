@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+input[type="date"]::-webkit-calendar-picker-indicator {
+    /* ده بيخلي لون الأيقونة يميل للون اللي أنت عايزه (مثلاً البرتقالي) */
+    filter: invert(53%) sepia(85%) saturate(468%) hue-rotate(345deg) brightness(95%) contrast(89%);
+    cursor: pointer;
+}
 
 @layer base {
     :root {

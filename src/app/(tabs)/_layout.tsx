@@ -1,71 +1,36 @@
-import React from 'react';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs, useRouter } from 'expo-router';
-import { Pressable } from 'react-native';
-
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { LogOut } from 'lucide-react-native';
-import { auth } from '@/services/firebaseConfig';
-import { signOut } from 'firebase/auth';
-
-
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
-  color: string;
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
-}
-
+import LocationProvider from '@/hooks/Locations';
+import { NativeTabs, Icon, Label } from 'expo-router/unstable-native-tabs';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useUser } from '@/hooks/useUsers';
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const router = useRouter();
 
 
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error("Error signing out: ", error);
-    }
-  };
 
   return (
-    <Tabs
+    <LocationProvider>
+      <NativeTabs
 
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: true,
-        headerRight: () => (
-          <Pressable
-            onPress={handleSignOut}
-            style={({ pressed }) => ({
-              opacity: pressed ? 0.5 : 1,
-              backgroundColor: "transparent",
-              marginRight: 15, // مسافة من حافة الشاشة
-            })}
-          >
-            <LogOut size={24} color='red' />
-          </Pressable>
-        ),
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+        tintColor="#E7872E"
+
+        labelStyle={{
+          color: '#525252',
         }}
-      />
-      <Tabs.Screen
-        name="two"
-        options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-        }}
-      />
-    </Tabs>
+      >
+        <NativeTabs.Trigger name="index">
+          <Label>Home</Label>
+          <Icon sf="house.fill" drawable="custom_android_drawable" />
+        </NativeTabs.Trigger>
+        <NativeTabs.Trigger name="two">
+          <Icon sf="gear" drawable="custom_settings_drawable" />
+          <Label>Settings</Label>
+        </NativeTabs.Trigger>
+        <NativeTabs.Trigger name="profile">
+          <Label>Profile</Label>
+          <Icon sf="house.fill" drawable="custom_android_drawable" />
+        </NativeTabs.Trigger>
+      </NativeTabs>
+
+    </LocationProvider>
+
   );
 }

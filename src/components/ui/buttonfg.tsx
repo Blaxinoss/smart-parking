@@ -1,6 +1,9 @@
 import { LucideIcon } from "lucide-react-native";
 import { Pressable, Text } from "react-native";
 
+import { colors, fonts, iconSizes, sizes, textSizes } from '../../constants/reusables'
+
+
 const variants = {
     primary: "bg-main-900",
     primary_orangeDark: "bg-main-950 border-[3px] border-garage-800",
@@ -30,36 +33,6 @@ const variantText: Record<keyof typeof variants, string> = {
 };
 
 
-const colors = {
-    main: {
-        900: '#E7872E',
-    },
-    garage: {
-        50: '#FAFAFA',
-        500: '#7C7C7C',
-        700: '#525252',
-        900: '#161616',
-    },
-};
-
-const sizes = {
-    sm: "px-4 py-2",
-    md: "px-5 py-3",
-    lg: "px-6 py-4",
-};
-
-const textSizes = {
-    sm: "text-sm",
-    md: "text-base",
-    lg: "text-lg",
-};
-
-const iconSizes = {
-    sm: 16,
-    md: 24,
-    lg: 32,
-}
-
 const variantIconColor: Record<keyof typeof variants, string> = {
     primary: colors.garage[50],             // text-garage-50
     primary_orangeDark: colors.garage[50],  // text-garage-50
@@ -77,42 +50,45 @@ const variantIconColor: Record<keyof typeof variants, string> = {
 interface BaseButtonProps {
     theme?: keyof typeof variants;
     size?: keyof typeof sizes;
-    font?: string;
+    font?: keyof typeof fonts;
     IconDi?: "left" | "right";
     onPress?: () => void;
+    children?: React.ReactNode
     className?: string;
 }
 
 type ButtonProps = BaseButtonProps & (
-    | { text: string; Icon?: LucideIcon } // حالة النص إلزامي والأيقونة اختيارية
-    | { Icon: LucideIcon; text?: string } // حالة الأيقونة إلزامية والنص اختياري
+    | { title: string; Icon?: LucideIcon } // حالة النص إلزامي والأيقونة اختيارية
+    | { Icon?: LucideIcon; title?: string } // حالة الأيقونة إلزامية والنص اختياري
 );
 
 export default function Button({
-    text,
+    title,
     theme = "primary",
     size = "md",
-    font = "titillium-semibold",
+    font = "Titillium_Bold",
     Icon,
     IconDi = "left",
     className,
+    children,
     ...props
 
 }: ButtonProps) {
     return (
         <Pressable
             {...props}
-            className={`rounded-xl ${variants[theme]} ${sizes[size]} flex flex-row gap-2 items-center ${IconDi === "left" ? "flex-row" : "flex-row-reverse"} ${className}`}>
+            className={` w-full max-w-[500px] mx-auto rounded-xl ${variants[theme]} ${sizes[size]} justify-center  flex flex-row gap-2 items-center ${IconDi === "left" ? "flex-row" : "flex-row-reverse"} ${className}`}>
             {Icon && IconDi === "left" && (
                 <Icon size={iconSizes[size]} color={variantIconColor[theme]} />
             )}
 
-            {text && (
-                <Text className={`${variantText[theme]} font-${font}`}>
-                    {text}
+            {title && (
+                <Text className={`${variantText[theme]} ${textSizes[size]}   font-${fonts[font]}`}>
+                    {title}
                 </Text>
             )}
 
+            {children}
             {Icon && IconDi === "right" && (
                 <Icon size={iconSizes[size]} color={variantIconColor[theme]} />
             )}

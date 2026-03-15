@@ -1,27 +1,30 @@
-// 1. إنشاء الـ Context
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../services/firebaseConfig';
 
-const AuthContext = createContext<{ user: User | null, isLoading: boolean }>({
-    user: null,
-    isLoading: true,
+const AuthContext = createContext<{
+    firebaseUser: User | null,
+    isFirebaseLoading: boolean,
+}>({
+    firebaseUser: null,
+    isFirebaseLoading: true,
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
+    const [isFirebaseLoading, setisFirebaseLoading] = useState(true);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-            setUser(firebaseUser);
-            setIsLoading(false);
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setFirebaseUser(user);
+            setisFirebaseLoading(false); // أول ما فايربيز يرد، بنقفل اللودينج
         });
+
         return unsubscribe;
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, isLoading }}>
+        <AuthContext.Provider value={{ firebaseUser, isFirebaseLoading }}>
             {children}
         </AuthContext.Provider>
     );

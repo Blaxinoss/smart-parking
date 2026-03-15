@@ -1,18 +1,30 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Slot, Stack, useRootNavigationState, useRouter, useSegments } from 'expo-router';
+import { Slot, useRootNavigationState, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import 'react-native-reanimated';
 import '../../global.css';
-import { PortalHost } from '@rn-primitives/portal';
-import { useColorScheme } from '@/components/useColorScheme';
+import { useColorScheme } from 'nativewind';
 import { AuthProvider, useAuth } from '@/hooks/Auth';
-import { Text, View } from 'react-native';
-import { LogOut } from 'lucide-react-native';
-import Buttonfg from '@/components/ui/buttonfg';
-import Input from '@/components/ui/inputfg';
+import { ActivityIndicator, Text, View } from 'react-native';
+import { PortalHost } from '@rn-primitives/portal';
+import { DarkTheme, DefaultTheme } from '../components/Themed'
+import { ThemeProvider } from '@react-navigation/native';
+// import { StripeProviderWrapper } from '@/services/StripeProviderWrapper';
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQueryClient,
+} from '@tanstack/react-query'
+import { useUser } from '@/hooks/useUsers';
+import Toast from 'react-native-toast-message';
+import { toastConfig } from '@/components/ui/customToast';
+import { SocketProvider } from '@/hooks/SocketContext';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -23,6 +35,14 @@ export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: '(tabs)',
 };
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+
+    }
+  }
+});
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -55,141 +75,88 @@ export default function RootLayout() {
   }
 
   return (
-    <AuthProvider>
-      <RootLayoutNav />
-    </AuthProvider>
-
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <RootLayoutNav />
+      </AuthProvider>
+    </QueryClientProvider>
 
   );
 }
 
 function RootLayoutNav() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
+  const { colorScheme, setColorScheme } = useColorScheme();
+
   const segments = useSegments();
-  const { user, isLoading } = useAuth();
+  const { firebaseUser, isFirebaseLoading } = useAuth();
   const navigationState = useRootNavigationState();
+
+  const { data: userData, isLoading } = useUser()
+
   useEffect(() => {
 
+
     const inAuthGroup = segments[0] === '(auth)';
+    const inOnboardingStackGroup = segments[0] === '(onboard)';
 
-    if (isLoading || !navigationState?.key) return;
+    if (isFirebaseLoading || !navigationState?.key || isLoading) return;
 
-    if (!user && !inAuthGroup) {
-      router.replace('/(auth)/login');
-    } else if (user && inAuthGroup) {
-      router.replace('/(tabs)');
+
+    if (!firebaseUser && !inAuthGroup) {
+      if (!inAuthGroup) {
+        router.replace('/(auth)/login');
+      }
+
+    } else if (firebaseUser && !userData) {
+      if (!inOnboardingStackGroup) {
+        router.replace('/(onboard)');
+      }
+    } else if (firebaseUser && userData) {
+      if (inAuthGroup || inOnboardingStackGroup) {
+        router.replace('/(tabs)')
+      }
     }
 
 
-  }, [user, isLoading, segments, navigationState?.key]);
+  }, [firebaseUser, isLoading, segments, isFirebaseLoading, userData, router, navigationState?.key]);
 
 
-  if (isLoading) return <Text>Loading...</Text>;
+  useEffect(() => {
+    setColorScheme("dark");
 
+  }, [colorScheme])
+
+  if (isLoading || isFirebaseLoading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: 'black', justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#E7872E" />
+      </View>
+    );
+  }
 
 
   return (
-    // <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-    //   <Slot />
-    //   <PortalHost />
 
-    // </ThemeProvider>
-    <View className='flex flex-row gap-4 flex-wrap'>
-      <View className='gap-2'>
-        <Buttonfg text='Placeholder' />
-        <Buttonfg text='Placeholder' theme='primary_orangeDark' />
-        <Buttonfg text='Placeholder' theme='primary_shine' />
-        <Buttonfg text='Placeholder' theme='primary_white' />
-        <Buttonfg text='Placeholder' theme='primary_whiteB' />
-        <Buttonfg text='Placeholder' theme='primary_dull' />
-        <Buttonfg text='Placeholder' theme='primary_cool' />
-        <Buttonfg text='Placeholder' theme='primary_orangeLight' />
-        <Buttonfg text='Placeholder' theme='primary_dullNbg' />
-        <Buttonfg text='Placeholder' theme='primary_sharpSilver' />
+    <GestureHandlerRootView style={{ flex: 1 }}>
 
-        <Buttonfg text='Placeholder' theme='primary_black' />
-      </View>
+      <SocketProvider>
+        <SafeAreaProvider>
+          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
 
-      <View className='gap-2'>
-        <Buttonfg text='Placeholder' size='sm' />
-        <Buttonfg text='Placeholder' theme='primary_orangeDark' size='sm' />
-        <Buttonfg text='Placeholder' theme='primary_shine' size='sm' />
-        <Buttonfg text='Placeholder' theme='primary_white' size='sm' />
-        <Buttonfg text='Placeholder' theme='primary_whiteB' size='sm' />
-        <Buttonfg text='Placeholder' theme='primary_dull' size='sm' />
-        <Buttonfg text='Placeholder' theme='primary_cool' size='sm' />
-        <Buttonfg text='Placeholder' theme='primary_orangeLight' size='sm' />
-        <Buttonfg text='Placeholder' theme='primary_dullNbg' size='sm' />
-        <Buttonfg text='Placeholder' theme='primary_sharpSilver' size='sm' />
+            {/* <StripeProviderWrapper> */}
+            <Slot />
 
-        <Buttonfg text='Placeholder' theme='primary_black' size='sm' />
-      </View>
+            <PortalHost />
+            {/* </StripeProviderWrapper> */}
+          </ThemeProvider >
+        </SafeAreaProvider>
 
-      <View className='gap-2'>
-        <Buttonfg text='Placeholder' theme='primary_orangeDark' size='sm' Icon={LogOut} />
+      </SocketProvider>
+      <Toast config={toastConfig} />
 
-        <Buttonfg text='Placeholder' theme='primary_orangeDark' size='sm' Icon={LogOut} />
-        <Buttonfg text='Placeholder' theme='primary_shine' size='sm' Icon={LogOut} />
-        <Buttonfg text='Placeholder' theme='primary_white' size='sm' Icon={LogOut} />
-        <Buttonfg text='Placeholder' theme='primary_whiteB' size='sm' Icon={LogOut} />
-        <Buttonfg text='Placeholder' theme='primary_dull' size='sm' Icon={LogOut} />
-        <Buttonfg text='Placeholder' theme='primary_cool' size='sm' Icon={LogOut} />
-        <Buttonfg text='Placeholder' theme='primary_orangeLight' size='sm' Icon={LogOut} />
-        <Buttonfg text='Placeholder' theme='primary_dullNbg' size='sm' Icon={LogOut} />
-        <Buttonfg text='Placeholder' theme='primary_sharpSilver' size='sm' Icon={LogOut} />
-
-        <Buttonfg text='Placeholder' theme='primary_black' size='sm' Icon={LogOut} />
-      </View>
+    </GestureHandlerRootView>
 
 
-      <View className='gap-2'>
-        <Buttonfg text='Placeholder' theme='primary_orangeDark' size='sm' Icon={LogOut} IconDi='right' />
-
-        <Buttonfg text='Placeholder' theme='primary_orangeDark' size='sm' Icon={LogOut} IconDi='right' />
-        <Buttonfg text='Placeholder' theme='primary_shine' size='sm' Icon={LogOut} IconDi='right' />
-        <Buttonfg text='Placeholder' theme='primary_white' size='sm' Icon={LogOut} IconDi='right' />
-        <Buttonfg text='Placeholder' theme='primary_whiteB' size='sm' Icon={LogOut} IconDi='right' />
-        <Buttonfg text='Placeholder' theme='primary_dull' size='sm' Icon={LogOut} IconDi='right' />
-        <Buttonfg text='Placeholder' theme='primary_cool' size='sm' Icon={LogOut} IconDi='right' />
-        <Buttonfg text='Placeholder' theme='primary_orangeLight' size='sm' Icon={LogOut} IconDi='right' />
-        <Buttonfg text='Placeholder' theme='primary_dullNbg' size='sm' Icon={LogOut} IconDi='right' />
-        <Buttonfg text='Placeholder' theme='primary_sharpSilver' size='sm' Icon={LogOut} IconDi='right' />
-
-        <Buttonfg text='Placeholder' theme='primary_black' size='sm' Icon={LogOut} IconDi='right' />
-      </View>
-
-
-      <View className='gap-2'>
-        <Buttonfg theme='primary_orangeDark' size='sm' Icon={LogOut} IconDi='right' />
-
-        <Buttonfg theme='primary_orangeDark' size='sm' Icon={LogOut} IconDi='right' />
-        <Buttonfg theme='primary_shine' size='sm' Icon={LogOut} IconDi='right' />
-        <Buttonfg theme='primary_white' size='sm' Icon={LogOut} IconDi='right' />
-        <Buttonfg theme='primary_whiteB' size='sm' Icon={LogOut} IconDi='right' />
-        <Buttonfg theme='primary_dull' size='sm' Icon={LogOut} IconDi='right' />
-        <Buttonfg theme='primary_cool' size='sm' Icon={LogOut} IconDi='right' />
-        <Buttonfg theme='primary_orangeLight' size='sm' Icon={LogOut} IconDi='right' />
-        <Buttonfg theme='primary_dullNbg' size='sm' Icon={LogOut} IconDi='right' />
-        <Buttonfg theme='primary_sharpSilver' size='sm' Icon={LogOut} IconDi='right' />
-
-        <Buttonfg theme='primary_black' size='sm' Icon={LogOut} IconDi='right' />
-      </View>
-
-      <View>
-        <Input
-          label="Email"
-          placeholder="Enter your email"
-        />
-
-        <Input
-          label="Password"
-          placeholder="Enter your password"
-          error="This field is required"
-        />
-
-      </View>
-
-    </View>
   );
 }

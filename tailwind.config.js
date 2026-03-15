@@ -2,6 +2,7 @@
 const { hairlineWidth } = require('nativewind/theme');
 
 module.exports = {
+  darkMode: 'class',
   // زودتلك app و components عشان لو بتستخدم Expo Router
   content: [
     './app/**/*.{js,jsx,ts,tsx}',
