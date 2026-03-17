@@ -13,11 +13,12 @@ import { Link, router } from 'expo-router';
 import { Modal } from 'react-native';
 import { AxiosAPI } from '@/services/axiosApi';
 import Toast from 'react-native-toast-message';
-import { PropsWithChildren, Ref, RefObject, useEffect, useState } from 'react';
-
+import { PropsWithChildren, Ref, RefObject, useEffect, useRef, useState } from 'react';
 import { useCancelReservation, useUserReservations } from '@/hooks/useReservations';
 import { useUser } from '@/hooks/useUsers';
 import { AxiosError } from 'axios';
+import { useLocationHook } from '@/hooks/Locations';
+import { isPointWithinRadius } from 'geolib'
 
 
 interface ReservationResponse {
@@ -186,11 +187,13 @@ export const OnGoingReservation = ({ bottomSheetRef }: { bottomSheetRef: RefObje
                 <View className="flex-row gap-4 px-4 mt-6">
                     {/* الزرار الأساسي: Start Navigation */}
                     <TouchableOpacity
+                        onPress={() => { bottomSheetRef.current?.snapToIndex(0) }}
                         activeOpacity={0.7}
                         className="flex-1 bg-main-900 py-4 rounded-[22px] items-center flex-row justify-center gap-2 shadow-xl shadow-main-900/40 border border-main-800"
                     >
                         <MapPin size={20} color="black" />
-                        <StyledText className="text-black font-titillium-bold text-[15px]">
+                        <StyledText
+                            className="text-black font-titillium-bold text-[15px]">
                             Navigate
                         </StyledText>
                     </TouchableOpacity>
@@ -216,6 +219,7 @@ export const OnGoingReservation = ({ bottomSheetRef }: { bottomSheetRef: RefObje
                     </StyledText>
                 </TouchableOpacity>
             </View>
+
 
             <Modal
                 animationType="fade"
@@ -255,6 +259,8 @@ export const OnGoingReservation = ({ bottomSheetRef }: { bottomSheetRef: RefObje
                     </View>
                 </View>
             </Modal>
+
+
         </BottomSheetView>
     );
 };
