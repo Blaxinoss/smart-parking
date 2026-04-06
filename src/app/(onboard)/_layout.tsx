@@ -41,7 +41,7 @@ export default function BoardLayout() {
     };
     return (
         <OnboardingContext.Provider value={{ data, updateData }}>
-            <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }} />
+            <Stack screenOptions={{ headerShown: false }} />
 
         </OnboardingContext.Provider>
     );

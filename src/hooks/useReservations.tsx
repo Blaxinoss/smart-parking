@@ -5,12 +5,10 @@ import Toast from 'react-native-toast-message';
 import { AxiosError } from 'axios';
 
 const fetchUserReservations = async () => {
-    const response = await AxiosAPI.get<Reservation[]>('client/reservations');
+    const response = await AxiosAPI.get<Reservation | null>('client/reservations/active');
 
-    const data = response.data;
-    return (data && data.length > 0) ? data[0] : null;
+    return response.data;
 };
-
 export const useUserReservations = () => {
 
     return useQuery({
@@ -88,7 +86,6 @@ interface ReservationResponse {
 }
 
 // في useUserReservations.ts
-
 export const useConfirmReservation = () => {
     const queryClient = useQueryClient();
 
@@ -98,16 +95,23 @@ export const useConfirmReservation = () => {
             return response.data;
         },
 
-        onError: (err: any, _, context) => {
-            Toast.show({ type: 'error', text1: 'Reservation Failed', text2: err.response?.data?.error });
+        onError: (err: any) => {
+            Toast.show({
+                type: 'error',
+                text1: 'Reservation Failed',
+                text2: err.response?.data?.error
+            });
         },
 
         onSuccess: (data) => {
+            // ✅ حط الـ data الجديدة في الـ cache مباشرة
+            queryClient.setQueryData(["userReservations"], data);
             Toast.show({ type: 'success', text1: 'Reservation Accomplished! 🎉' });
         },
 
-        onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: ["userReservations"] });
-        },
+        // ❌ شيل onSettled دي تماماً
+        // onSettled: () => {
+        //     queryClient.invalidateQueries({ queryKey: ["userReservations"] });
+        // },
     });
 };

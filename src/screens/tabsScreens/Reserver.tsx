@@ -72,7 +72,7 @@ export const Reserver = ({ bottomSheetRef }: { bottomSheetRef: RefObject<BottomS
   };
 
 
-  if (isSuccess || isPending) {
+  if (isLoading || isPending) {
     return <SafeAreaView><ActivityIndicator></ActivityIndicator></SafeAreaView>
   }
 

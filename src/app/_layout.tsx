@@ -23,6 +23,7 @@ import { toastConfig } from '@/components/ui/customToast';
 import { SocketProvider } from '@/hooks/SocketContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useUserSessions } from '@/hooks/useSessions';
 
 
 
@@ -103,6 +104,7 @@ function RootLayoutNav() {
     if (isFirebaseLoading || !navigationState?.key || isLoading) return;
 
 
+
     if (!firebaseUser && !inAuthGroup) {
       if (!inAuthGroup) {
         router.replace('/(auth)/login');
@@ -126,37 +128,32 @@ function RootLayoutNav() {
     setColorScheme("dark");
 
   }, [colorScheme])
-
-  if (isLoading || isFirebaseLoading) {
-    return (
-      <View style={{ flex: 1, backgroundColor: 'black', justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#E7872E" />
-      </View>
-    );
-  }
-
+  const isAppLoading = isLoading || isFirebaseLoading;
 
   return (
-
     <GestureHandlerRootView style={{ flex: 1 }}>
-
       <SocketProvider>
         <SafeAreaProvider>
           <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-
-            {/* <StripeProviderWrapper> */}
             <Slot />
-
             <PortalHost />
-            {/* </StripeProviderWrapper> */}
-          </ThemeProvider >
+          </ThemeProvider>
         </SafeAreaProvider>
-
       </SocketProvider>
+
+      {isAppLoading && (
+        <View
+          style={{
+            backgroundColor: 'black',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <ActivityIndicator size="large" color="#E7872E" />
+        </View>
+      )}
+
       <Toast config={toastConfig} />
-
     </GestureHandlerRootView>
-
-
   );
 }

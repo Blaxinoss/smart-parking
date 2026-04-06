@@ -1,3 +1,5 @@
 export const CANCELED_RESERVATION_EMITTER_MESSAGE = "CANCELED_RESERVATION";
-export const ngrok = "https://5902-45-243-244-41.ngrok-free.app"
+export const ngrok = "https://bd10-45-247-48-101.ngrok-free.app"
 export const SLOT_STATUS_CHANGED_MESSAGE = "SLOT_STATUS_CHANGED"
+export const VERIFYING_PLATE_GATE_ENTRY = "VERIFYING_PLATE_GATE_ENTRY";
+export const DECISION_GATE_ENTRY_EMIT = "DECISION_GATE_ENTRY_EMIT";

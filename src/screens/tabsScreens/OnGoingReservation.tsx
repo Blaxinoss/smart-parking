@@ -17,7 +17,6 @@ import { PropsWithChildren, Ref, RefObject, useEffect, useRef, useState } from '
 import { useCancelReservation, useUserReservations } from '@/hooks/useReservations';
 import { useUser } from '@/hooks/useUsers';
 import { AxiosError } from 'axios';
-import { useLocationHook } from '@/hooks/Locations';
 import { isPointWithinRadius } from 'geolib'
 
 
