@@ -8,7 +8,6 @@ interface StyledTextProps extends TextProps {
     rightIcon?: ReactNode; // الأيقونة اللي على اليمين
     containerClassName?: string; // عشان لو عايز تدي ستايل للـ View الخارجي
 }
-
 export const StyledText = ({
     children,
     className,
@@ -22,7 +21,8 @@ export const StyledText = ({
             {leftIcon && <View className="mr-2">{leftIcon}</View>}
 
             <Text
-                className={`text-garage-100 font-titillium ${className} mt-1`}
+                // ضفنا flex-shrink هنا عشان يخلي الكلام ينزل سطر جديد وميزقش الشاشة
+                className={`flex-shrink text-garage-100 font-titillium ${className} mt-1`}
                 style={{ height: "auto" }}
                 {...props}
             >

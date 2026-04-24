@@ -2,6 +2,7 @@ import { StyledText } from "@/components/ui/styledText";
 import { useLocationHook } from "@/hooks/Locations";
 import { TouchableOpacity } from "react-native";
 import type Location from 'expo-location'
+import { useQueryClient } from "@tanstack/react-query";
 
 type DeveloperToolsProps = {
     setcoordsFull: React.Dispatch<React.SetStateAction<Location.LocationObjectCoords | null>>;
@@ -15,13 +16,13 @@ type coord = {
 
 export const DeveloperToolsbuttons = ({ setcoordsFull, setRouteCoordinates }: DeveloperToolsProps) => {
     const { initLocation, FIXED_MAYCHANGE_DEST } = useLocationHook();
-
+    const queryClient = useQueryClient()
 
     if (!initLocation) return null;
     return (
         <>
             <TouchableOpacity
-                style={{ position: 'absolute', top: 50, left: 20, backgroundColor: 'red', padding: 10, borderRadius: 10, zIndex: 100 }}
+                style={{ position: 'absolute', top: 90, left: 20, backgroundColor: 'red', padding: 10, borderRadius: 10, zIndex: 100 }}
                 onPress={() => {
 
                     const mockLocation = {
@@ -42,8 +43,19 @@ export const DeveloperToolsbuttons = ({ setcoordsFull, setRouteCoordinates }: De
                 <StyledText className="text-white font-bold">Teleport to Garage</StyledText>
             </TouchableOpacity>
 
+
             <TouchableOpacity
-                style={{ position: 'absolute', top: 50, left: 200, backgroundColor: 'red', padding: 10, borderRadius: 10, zIndex: 100 }}
+                style={{ position: 'absolute', top: 100, left: 100, backgroundColor: 'red', padding: 10, borderRadius: 10, zIndex: 100 }}
+                onPress={async () => {
+
+                    await queryClient.invalidateQueries()
+                }}
+            >
+                <StyledText className="text-white font-bold">refresh cash</StyledText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+                style={{ position: 'absolute', top: 90, left: 200, backgroundColor: 'red', padding: 10, borderRadius: 10, zIndex: 100 }}
                 onPress={() => {
 
                     const mockLocation = {

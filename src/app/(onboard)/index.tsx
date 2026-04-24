@@ -20,7 +20,7 @@ const UserInfoSchema = z.object({
     licenseNumber: z.string().min(5, "Invalid license number"), // عدلت الطول هنا ليكون منطقي
     licenseExpiry: z.date({
         error: "Please select a valid date"
-    }).refine(date => date > new Date(), "License must not be expired"),
+    }).refine(date => date.getTime() > (new Date().getTime() - 1000000), "License must not be expired"),
 });
 
 export default function UserInfoStep() {

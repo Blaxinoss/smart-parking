@@ -1,3 +1,11 @@
+
+
+export interface EmittedData {
+    type: string;
+    message: string;
+}
+
+
 // --- Enums ---
 export enum ReservationsStatus {
     CONFIRMED = 'CONFIRMED',
@@ -9,7 +17,8 @@ export enum ReservationsStatus {
 export enum ParkingSessionStatus {
     ACTIVE = 'ACTIVE',
     COMPLETED = 'COMPLETED',
-    CANCELLED = 'CANCELLED'
+    CANCELLED = 'CANCELLED',
+    EXITING = 'EXITING'
 }
 
 export enum TransactionStatus {

@@ -94,7 +94,7 @@ function RootLayoutNav() {
   const navigationState = useRootNavigationState();
 
   const { data: userData, isLoading } = useUser()
-
+  
   useEffect(() => {
 
 

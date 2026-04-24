@@ -4,12 +4,15 @@ import { OnGoingReservation } from "./OnGoingReservation";
 import { Reserver } from "./Reserver";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { ActiveSessionManager } from "./ActiveSessionManager";
+import { ParkingSession, ParkingSessionStatus } from "@/constants/types";
+import { ExitSessionManager } from "../insideGarage/ExitSessionManager";
+import { useQuery } from "@tanstack/react-query";
 
 type ReservationManagerProps = {
     isLoadingReservation: boolean;
     isLoadingSession: boolean;
     reservation: any;
-    session: any;
+    session: ParkingSession | null;
     bottomSheetRef: React.RefObject<BottomSheet>;
     shouldSessionStart: boolean;
 };
@@ -23,6 +26,14 @@ export const ReservationManager = ({
     shouldSessionStart
 }: ReservationManagerProps) => {
 
+    // 1. جلب حالة البوابة (لو اليوزر واقف عليها دلوقتي)
+    const { data: gateState } = useQuery({
+        queryKey: ["exitGateState"],
+        enabled: false,
+        initialData: null,
+        queryFn: async () => null
+    });
+
     // ============================================================================
     // 🔄 Loading State
     // ============================================================================
@@ -35,41 +46,30 @@ export const ReservationManager = ({
     }
 
     // ============================================================================
-    // 📊 Rendering Logic
+    // 📊 Rendering Logic (Priority Based)
     // ============================================================================
 
-    // 1. Active Session (user is inside garage)
-    if (session) {
-        console.log("found session")
-        return (
-            <ActiveSessionManager
-                bottomSheetRef={bottomSheetRef}
-                reservation={reservation}
-                session={session}
-            />
-        );
+
+    if (gateState || session?.status === ParkingSessionStatus.EXITING) {
+        return <ExitSessionManager bottomSheetRef={bottomSheetRef} session={session!} />;
     }
 
-    // 2. Reservation exists AND should start (at gate, ready to enter)
-    if (reservation && shouldSessionStart) {
-        console.log("found reservation and inplace")
-        return (
-            <ActiveSessionManager
-                bottomSheetRef={bottomSheetRef}
-                reservation={reservation}
-                session={null}
-            />
-        );
+    // 2. حالة الركنة النشطة (جوه السلوت)
+    if (session?.status === ParkingSessionStatus.ACTIVE) {
+        return <ActiveSessionManager bottomSheetRef={bottomSheetRef} reservation={reservation} session={session} />;
     }
 
-    // 3. Reservation exists but NOT ready to start (user hasn't arrived yet)
+    // --- المرحلة التانية: التعامل مع الحجوزات (لو مفيش جلسة شغالة) ---
     if (reservation) {
-        console.log("found reservation only")
+        // وصل الجراج والمفروض يبدأ الركنة
+        if (shouldSessionStart) {
+            return <ActiveSessionManager bottomSheetRef={bottomSheetRef} reservation={reservation} session={null} />;
+        }
 
+        // حجز شغال بس لسه موصلش
         return <OnGoingReservation bottomSheetRef={bottomSheetRef} />;
     }
 
-    // 4. No reservation, no session (show reservation form)
-    console.log("falling back to the normal mode reservation")
+    // --- المرحلة التالتة: الفول باك (لا جلسة ولا حجز) ---
     return <Reserver bottomSheetRef={bottomSheetRef} />;
 };
