@@ -1,35 +1,33 @@
+import { toastConfig } from '@/components/ui/customToast';
+import { AuthProvider, useAuth } from '@/hooks/Auth';
+import { SocketProvider } from '@/hooks/SocketContext';
+import { useUser } from '@/hooks/useUsers';
+import { StripeProviderWrapper } from '@/services/StripeProviderWrapper';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { ThemeProvider } from '@react-navigation/native';
+import { PortalHost } from '@rn-primitives/portal';
+import {
+  QueryClient,
+  QueryClientProvider
+} from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { Slot, useRootNavigationState, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import React, { useEffect } from 'react';
-import 'react-native-reanimated';
-import '../../global.css';
 import { useColorScheme } from 'nativewind';
-import { AuthProvider, useAuth } from '@/hooks/Auth';
-import { ActivityIndicator, Text, View } from 'react-native';
-import { PortalHost } from '@rn-primitives/portal';
-import { DarkTheme, DefaultTheme } from '../components/Themed'
-import { ThemeProvider } from '@react-navigation/native';
-// import { StripeProviderWrapper } from '@/services/StripeProviderWrapper';
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQueryClient,
-} from '@tanstack/react-query'
-import { useUser } from '@/hooks/useUsers';
-import Toast from 'react-native-toast-message';
-import { toastConfig } from '@/components/ui/customToast';
-import { SocketProvider } from '@/hooks/SocketContext';
+import React, { useEffect } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { useUserSessions } from '@/hooks/useSessions';
+import Toast from 'react-native-toast-message';
+import '../../global.css';
+import { DarkTheme, DefaultTheme } from '../components/Themed';
 
 
 
 export {
   // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
+  ErrorBoundary
 } from 'expo-router';
 
 export const unstable_settings = {
@@ -94,7 +92,7 @@ function RootLayoutNav() {
   const navigationState = useRootNavigationState();
 
   const { data: userData, isLoading } = useUser()
-  
+
   useEffect(() => {
 
 
@@ -134,10 +132,13 @@ function RootLayoutNav() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SocketProvider>
         <SafeAreaProvider>
-          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-            <Slot />
-            <PortalHost />
-          </ThemeProvider>
+          <StripeProviderWrapper >
+            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+
+              <Slot />
+              <PortalHost />
+            </ThemeProvider>
+          </StripeProviderWrapper>
         </SafeAreaProvider>
       </SocketProvider>
 

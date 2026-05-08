@@ -19,7 +19,7 @@ type SessionStatus =
 interface ActiveSessionManagerProps {
     reservation: any;
     session: ParkingSession | null;
-    bottomSheetRef: React.RefObject<BottomSheet>;
+    bottomSheetRef: React.RefObject<BottomSheet | null>;
 }
 
 export const ActiveSessionManager = ({
@@ -116,8 +116,8 @@ export const ActiveSessionManager = ({
                             Please drive through. Your session will start automatically.
                         </StyledText>
                         {latestSlot && (
-                            <View className="mt-4 bg-garage-900 border-2 border-green-500 rounded-2xl p-4">
-                                <StyledText className="text-garage-400 text-xs uppercase text-center mb-1">
+                            <View className="mt-4  bg-garage-900 border-2 border-green-500 rounded-2xl p-4">
+                                <StyledText className="text-garage-400 h-auto text-xs uppercase text-center mb-1">
                                     Assigned Slot
                                 </StyledText>
                                 <StyledText className="text-white text-3xl font-titillium-bold text-center">

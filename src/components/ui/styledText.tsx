@@ -1,10 +1,11 @@
 import { ReactNode } from "react";
 import { Text, TextProps, View } from "react-native";
+import { Icon } from "./icon";
 
 interface StyledTextProps extends TextProps {
     children: ReactNode;
     className?: string;
-    leftIcon?: ReactNode;  // الأيقونة اللي على الشمال
+    leftIcon?: any;  // الأيقونة اللي على الشمال
     rightIcon?: ReactNode; // الأيقونة اللي على اليمين
     containerClassName?: string; // عشان لو عايز تدي ستايل للـ View الخارجي
 }
@@ -18,7 +19,7 @@ export const StyledText = ({
 }: StyledTextProps) => {
     return (
         <View className={`flex-row items-center ${containerClassName}`}>
-            {leftIcon && <View className="mr-2">{leftIcon}</View>}
+            {leftIcon && <View className="mr-2"><Icon size={30} as={leftIcon} /></View>}
 
             <Text
                 // ضفنا flex-shrink هنا عشان يخلي الكلام ينزل سطر جديد وميزقش الشاشة

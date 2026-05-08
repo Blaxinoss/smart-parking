@@ -25,6 +25,7 @@ export default function WebLayout() {
                 headerShown: false,
             }}>
                 <Tabs.Screen name="index" options={{ title: 'Home', tabBarIcon: ({ color }) => <Home color={color} /> }} />
+                <Tabs.Screen name="two" options={{ title: 'History', tabBarIcon: ({ color }) => <Settings color={color} /> }} />
                 <Tabs.Screen name="profile" options={{ title: 'Profile', tabBarIcon: ({ color }) => <User color={color} /> }} />
             </Tabs>
         </ LocationProvider>

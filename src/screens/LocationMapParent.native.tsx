@@ -19,7 +19,7 @@ type coord = {
 
 
 
-export const LocationMapParent = ({ setShouldSessionStart, bottomSheetRef }: { setShouldSessionStart: (x: boolean) => void, bottomSheetRef: React.RefObject<BottomSheet> }) => {
+export const LocationMapParent = ({ setShouldSessionStart, bottomSheetRef }: { setShouldSessionStart: (x: boolean) => void, bottomSheetRef: React.RefObject<BottomSheet | null> }) => {
     const { coordsFull, setcoordsFull, initLocation, FIXED_MAYCHANGE_DEST } = useLocationHook();
 
 

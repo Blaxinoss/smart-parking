@@ -1,5 +1,5 @@
 export const CANCELED_RESERVATION_EMITTER_MESSAGE = "CANCELED_RESERVATION";
-export const ngrok = "https://d18e-197-162-82-220.ngrok-free.app"
+export const ngrok = "https://gale-untraumatic-estella.ngrok-free.dev"
 export const SLOT_STATUS_CHANGED_MESSAGE = "SLOT_STATUS_CHANGED"
 export const VERIFYING_PLATE_GATE_ENTRY = "VERIFYING_PLATE_GATE_ENTRY";
 export const DECISION_GATE_ENTRY_EMIT = "DECISION_GATE_ENTRY_EMIT";
@@ -10,11 +10,8 @@ export const HANDLE_HAS_DONE_VIOLATION = "HANDLE_HAS_DONE_VIOLATION"
 export const HANDLE_SLOT_EXIT_EMIT = "HANDLE_SLOT_EXIT_EMIT"
 export const HANDLE_GATE_EXIT_EMIT = "HANDLE_GATE_EXIT_EMIT"
 export const MINIMUM_CHARGE = 70.0;
-
-
-
-
-
+export const DEBT_CLEARED = "DEBT_CLEARED"
+export const USER_DATA_UPDATED = "USER_DATA_UPDATED"
 
 
 

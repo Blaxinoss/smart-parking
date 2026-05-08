@@ -22,7 +22,7 @@ export const DeveloperToolsbuttons = ({ setcoordsFull, setRouteCoordinates }: De
     return (
         <>
             <TouchableOpacity
-                style={{ position: 'absolute', top: 90, left: 20, backgroundColor: 'red', padding: 10, borderRadius: 10, zIndex: 100 }}
+                style={{ position: 'absolute', top: 120, left: 20, backgroundColor: 'red', padding: 10, borderRadius: 10, zIndex: 100 }}
                 onPress={() => {
 
                     const mockLocation = {
@@ -45,7 +45,7 @@ export const DeveloperToolsbuttons = ({ setcoordsFull, setRouteCoordinates }: De
 
 
             <TouchableOpacity
-                style={{ position: 'absolute', top: 100, left: 100, backgroundColor: 'red', padding: 10, borderRadius: 10, zIndex: 100 }}
+                style={{ position: 'absolute', top: 120, left: 100, backgroundColor: 'red', padding: 10, borderRadius: 10, zIndex: 100 }}
                 onPress={async () => {
 
                     await queryClient.invalidateQueries()
@@ -55,7 +55,7 @@ export const DeveloperToolsbuttons = ({ setcoordsFull, setRouteCoordinates }: De
             </TouchableOpacity>
 
             <TouchableOpacity
-                style={{ position: 'absolute', top: 90, left: 200, backgroundColor: 'red', padding: 10, borderRadius: 10, zIndex: 100 }}
+                style={{ position: 'absolute', top: 120, left: 200, backgroundColor: 'red', padding: 10, borderRadius: 10, zIndex: 100 }}
                 onPress={() => {
 
                     const mockLocation = {

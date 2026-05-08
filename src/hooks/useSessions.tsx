@@ -10,12 +10,38 @@ const fetchUserSessions = async () => {
 };
 
 
+const fetchUserSessionsHistory = async () => {
+
+
+    try {
+        const response = await AxiosAPI.get<{ data: ParkingSession[] }>("client/sessions");
+        return response.data.data;
+    } catch (error: any) {
+        const statusCode = error?.response?.status;
+        if (statusCode !== 404) {
+            throw error;
+        }
+    }
+
+
+    return [];
+};
+
+
 export const useUserSessions = () => {
 
     return useQuery({
         queryKey: ["userSessions"],
         queryFn: fetchUserSessions,
         retry: 2,
+    });
+};
+
+export const useUserSessionsHistory = () => {
+    return useQuery({
+        queryKey: ['userSessionsHistory'],
+        queryFn: fetchUserSessionsHistory,
+        retry: 1,
     });
 };
 export const useExtendUserSession = () => {

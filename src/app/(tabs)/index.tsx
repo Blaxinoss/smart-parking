@@ -1,26 +1,29 @@
-import { ActivityIndicator, Pressable, View } from 'react-native';
-import MapView from 'react-native-maps';
-import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, View } from 'react-native';
+import { useRef, useState } from 'react';
 import LocationProvider, { useLocationHook } from '@/hooks/Locations';
 import BottomSheet, { useBottomSheetSpringConfigs } from '@gorhom/bottom-sheet';
-import { StyledText } from '@/components/ui/styledText';
 import { ReservationManager } from '@/screens/tabsScreens/ReservationManager';
 import Colors from '@/constants/Colors';
 import { useUserReservations } from '@/hooks/useReservations';
-import { SplitSquareVertical } from 'lucide-react-native';
+import { SplitSquareVertical, Bell } from 'lucide-react-native';
 import { Icon } from '@/components/ui/icon';
 import SlotsGrid from '@/screens/slots/slotGrid';
-import { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 
 import { useUserSessions } from '@/hooks/useSessions';
 import { LocationMapParent } from '@/screens/LocationMapParent';
+import DebtBanner from '@/screens/tabsScreens/DebtBanner';
+import { useUser } from '@/hooks/useUsers';
+import { DebtBannerGrid } from '@/screens/tabsScreens/DebtBannerGrid';
 
 
 
 
 export default function TabOneScreen() {
+  const { data: user } = useUser();
 
   const [isSlotsShown, setIsSlotsShown] = useState(false);
+  const [isNotificationsShown, setIsNotificationsShown] = useState(false); // 👈 State للإشعارات
   const { data: reservation, isLoading: isLoadingReservations } = useUserReservations();
   const { data: session, isLoading: isLoadingSession } = useUserSessions();
   const [shouldSessionStart, setShouldSessionStart] = useState(false);
@@ -39,6 +42,9 @@ export default function TabOneScreen() {
   const scaleSV = useSharedValue(0);
   const opacitySV = useSharedValue(0);
 
+  const notificationScaleSV = useSharedValue(0); // 👈 Shared Values منفصلة للإشعارات
+  const notificationOpacitySV = useSharedValue(0);
+
   const AnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: scaleSV.value }],
@@ -46,18 +52,37 @@ export default function TabOneScreen() {
     };
   });
 
+  const AnimatedNotifications = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scaleSV.value }],
+      opacity: opacitySV.value,
+    };
+  });
+
+
+
+  // ==========================================
+  // 🎛️ Handlers
+  // ==========================================
   const handleShowSlots = (isOpening: boolean) => {
     if (!isOpening) {
-      // قفل
       scaleSV.value = withTiming(0, { duration: 400 });
       opacitySV.value = withTiming(0, { duration: 300 });
     } else {
-      // فتح بـ Spring
       scaleSV.value = withSpring(1, { damping: 200, stiffness: 2000 });
       opacitySV.value = withTiming(1, { duration: 300 });
     }
   };
 
+  const handleShowAnimatedNotifications = (isOpening: boolean) => {
+    if (!isOpening) {
+      notificationScaleSV.value = withTiming(0, { duration: 400 });
+      notificationOpacitySV.value = withTiming(0, { duration: 300 });
+    } else {
+      notificationScaleSV.value = withSpring(1, { damping: 200, stiffness: 2000 });
+      notificationOpacitySV.value = withTiming(1, { duration: 300 });
+    }
+  };
 
 
 
@@ -75,7 +100,14 @@ export default function TabOneScreen() {
   }
 
   return (
-    <View className='flex-1'>
+    <View className='flex-1 bg-black'>
+
+      {user?.hasOutstandingDebt && (
+        <DebtBanner home={true} onPress={() => {
+          Alert.alert("still not Implemented")
+        }} />
+      )}
+
 
       <SlotsGrid SharedStyles={AnimatedStyle} />
       <Pressable
@@ -91,6 +123,45 @@ export default function TabOneScreen() {
         style={{ elevation: 5 }} className='rounded-full p-2 absolute right-7 top-14 border border-main-900 z-50  bg-black'>
         <Icon as={SplitSquareVertical} color={Colors.main[900]} size={30} />
       </Pressable>
+
+      {/* 🟢 زرار الـ Slots (يمين) */}
+      <Pressable
+        onPress={() => {
+          const newState = !isSlotsShown;
+          setIsSlotsShown(newState);
+          handleShowSlots(newState);
+
+          if (newState) {
+            bottomSheetRef.current?.snapToIndex(0);
+            // نقفل الإشعارات لو مفتوحة عشان الزحمة
+            setIsNotificationsShown(false);
+            handleShowAnimatedNotifications(false);
+          }
+        }}
+        style={{ elevation: 5 }}
+        className='rounded-full p-2 absolute right-7 top-14 border border-main-900 z-50 bg-black'>
+        <Icon as={SplitSquareVertical} color={Colors.main[900]} size={30} />
+      </Pressable>
+
+      {/* 🔔 زرار الـ Notifications (شمال) */}
+      <Pressable
+        onPress={() => {
+          const newState = !isNotificationsShown;
+          setIsNotificationsShown(newState);
+          handleShowAnimatedNotifications(newState);
+
+          if (newState) {
+            bottomSheetRef.current?.snapToIndex(0);
+            // نقفل السلوتس لو مفتوحة
+            setIsSlotsShown(false);
+            handleShowSlots(false);
+          }
+        }}
+        style={{ elevation: 5 }}
+        className='rounded-full p-2 absolute right-7 top-28 border border-main-900 z-50 bg-black'>
+        <Icon as={Bell} color={Colors.main[900]} size={30} />
+      </Pressable>
+
 
 
       <LocationProvider>

@@ -1,142 +1,144 @@
-// import FontAwesome from '@expo/vector-icons/FontAwesome';
-// import { useFonts } from 'expo-font';
-// import { Slot, useRootNavigationState, useRouter, useSegments } from 'expo-router';
-// import * as SplashScreen from 'expo-splash-screen';
-// import React, { useEffect } from 'react';
-// import 'react-native-reanimated';
-// import '../../global.css';
-// import { useColorScheme } from 'nativewind';
-// import { AuthProvider, useAuth } from '@/hooks/Auth';
-// import { ActivityIndicator, Text, View } from 'react-native';
-// import { PortalHost } from '@rn-primitives/portal';
-// import { DarkTheme, DefaultTheme } from '../components/Themed'
-// import { ThemeProvider } from '@react-navigation/native';
-// import {
-//     QueryClient,
-//     QueryClientProvider,
-// } from '@tanstack/react-query'
-// import Colors from '@/constants/Colors';
+import Button from '@/components/ui/buttonfg';
+import { AuthProvider, useAuth } from '@/hooks/Auth';
+import { useUser } from '@/hooks/useUsers';
+import { auth } from '@/services/firebaseConfig';
+import { signOut } from '@/services/signout';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { ThemeProvider } from '@react-navigation/native';
+import { PortalHost } from '@rn-primitives/portal';
+import {
+    QueryClient,
+    QueryClientProvider,
+} from '@tanstack/react-query';
+import { useFonts } from 'expo-font';
+import { Slot, useRootNavigationState, useRouter, useSegments } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { useColorScheme } from 'nativewind';
+import React, { useEffect } from 'react';
+import { ActivityIndicator, View } from 'react-native';
+import 'react-native-reanimated';
+import '../../global.css';
+import { DarkTheme, DefaultTheme } from '../components/Themed';
 
 
-// export {
-//     // Catch any errors thrown by the Layout component.
-//     ErrorBoundary,
-// } from 'expo-router';
+export {
+    // Catch any errors thrown by the Layout component.
+    ErrorBoundary
+} from 'expo-router';
 
-// export const unstable_settings = {
-//     // Ensure that reloading on `/modal` keeps a back button present.
-//     initialRouteName: '(tabs)',
-// };
+export const unstable_settings = {
+    // Ensure that reloading on `/modal` keeps a back button present.
+    initialRouteName: '(admin)',
+};
 
-// const queryClient = new QueryClient({
-//     defaultOptions: {
-//         queries: {
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
 
-//         }
-//     }
-// });
+        }
+    }
+});
 
-// // Prevent the splash screen from auto-hiding before asset loading is complete.
-// SplashScreen.preventAutoHideAsync();
+// Prevent the splash screen from auto-hiding before asset loading is complete.
+SplashScreen.preventAutoHideAsync();
 
-// export default function RootLayout() {
-//     const [loaded, error] = useFonts({
-//         SpaceMono: require('../../assets/fonts/SpaceMono-Regular.ttf'),
-//         Titillium_Reg: require('../../assets/fonts/TitilliumWeb-Regular.ttf'),
-//         Titillium_Bold: require('../../assets/fonts/TitilliumWeb-Bold.ttf'),
-//         Titillium_Light: require('../../assets/fonts/TitilliumWeb-Light.ttf'),
-//         Titillium_SemiBold: require('../../assets/fonts/TitilliumWeb-SemiBold.ttf'),
-//         Titillium_Black: require('../../assets/fonts/TitilliumWeb-Black.ttf'),
-//         Titillium_ExtraLight: require('../../assets/fonts/TitilliumWeb-ExtraLight.ttf'),
-//         ...FontAwesome.font,
-//     });
+export default function RootLayout() {
+    const [loaded, error] = useFonts({
+        SpaceMono: require('../../assets/fonts/SpaceMono-Regular.ttf'),
+        Titillium_Reg: require('../../assets/fonts/TitilliumWeb-Regular.ttf'),
+        Titillium_Bold: require('../../assets/fonts/TitilliumWeb-Bold.ttf'),
+        Titillium_Light: require('../../assets/fonts/TitilliumWeb-Light.ttf'),
+        Titillium_SemiBold: require('../../assets/fonts/TitilliumWeb-SemiBold.ttf'),
+        Titillium_Black: require('../../assets/fonts/TitilliumWeb-Black.ttf'),
+        Titillium_ExtraLight: require('../../assets/fonts/TitilliumWeb-ExtraLight.ttf'),
+        ...FontAwesome.font,
+    });
 
-//     // Expo Router uses Error Boundaries to catch errors in the navigation tree.
-//     useEffect(() => {
-//         if (error) throw error;
-//     }, [error]);
+    // Expo Router uses Error Boundaries to catch errors in the navigation tree.
+    useEffect(() => {
+        if (error) throw error;
+    }, [error]);
 
-//     useEffect(() => {
-//         if (loaded) {
-//             SplashScreen.hideAsync();
-//         }
-//     }, [loaded]);
+    useEffect(() => {
+        if (loaded) {
+            SplashScreen.hideAsync();
+        }
+    }, [loaded]);
 
-//     if (!loaded) {
-//         return null;
-//     }
+    if (!loaded) {
+        return null;
+    }
 
-//     return (
-//         <QueryClientProvider client={queryClient}>
-//             <AuthProvider>
-//                 <RootLayoutNav />
-//             </AuthProvider>
-//         </QueryClientProvider>
+    return (
+        <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+                <RootLayoutNav />
+            </AuthProvider>
+        </QueryClientProvider>
 
-//     );
-// }
+    );
+}
 
-// function RootLayoutNav() {
-//     const router = useRouter();
-//     const { colorScheme, setColorScheme } = useColorScheme();
+function RootLayoutNav() {
+    const router = useRouter();
+    const { colorScheme, setColorScheme } = useColorScheme();
 
-//     const segments = useSegments();
-//     const { firebaseUser, dbUser, isLoading, isDbLoading } = useAuth();
-//     const navigationState = useRootNavigationState();
+    const segments = useSegments();
+    const { firebaseUser, isFirebaseLoading } = useAuth();
+    const { data: dbUser, isLoading: isDbLoading } = useUser();
+    const navigationState = useRootNavigationState();
 
-//     useEffect(() => {
+    useEffect(() => {
 
-//         const inAuthGroup = segments[0] === '(auth)';
-//         const inOnboardingStackGroup = segments[0] === '(onboard)';
+        const inAuthGroup = segments[0] === '(auth)';
+        const inOnboardingStackGroup = segments[0] === '(onboard)';
 
-//         if (isLoading || !navigationState?.key || isDbLoading) return;
-//         console.log(dbUser)
-//         setTimeout(() => {
-
-//             if (!firebaseUser && !inAuthGroup) {
-//                 if (!inAuthGroup) {
-//                     router.replace('/(auth)/login');
-//                 }
-
-//             } else if (firebaseUser && !dbUser) {
-//                 if (!inOnboardingStackGroup) {
-//                     router.replace('/(onboard)');
-//                 }
-//             } else if (firebaseUser && dbUser) {
-//                 if (inAuthGroup || inOnboardingStackGroup) {
-//                     router.replace('/(tabs)')
-//                 }
-//             }
-//         }, 3000)
-
-
-//     }, [firebaseUser, dbUser, isLoading, segments, isDbLoading, navigationState?.key]);
-
-
-//     useEffect(() => {
-//         setColorScheme("dark");
-
-//     }, [colorScheme])
-
-
-//     if (isLoading || isDbLoading) {
-//         return (
-//             <View style={{ flex: 1, backgroundColor: 'black', justifyContent: 'center', alignItems: 'center' }}>
-//                 <ActivityIndicator size="large" color="#E7872E" />
-//             </View>
-//         );
-//     }
-
-
-//     return (
-
-//         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-//             <Slot />
-
-//             <PortalHost />
-//         </ThemeProvider >
+        if (isFirebaseLoading || !navigationState?.key || isDbLoading) return;
 
 
 
-//     );
-// }
+        if (!firebaseUser && !inAuthGroup) {
+            if (!inAuthGroup) {
+                router.replace('/(auth)/login');
+            }
+
+        } else if (firebaseUser && !dbUser) {
+            if (!inOnboardingStackGroup) {
+                router.replace('/(onboard)');
+            }
+        } else if (firebaseUser && dbUser) {
+            if (inAuthGroup || inOnboardingStackGroup) {
+                router.replace('/(admin)')
+            }
+        }
+
+
+    }, [firebaseUser, isDbLoading, segments, isFirebaseLoading, dbUser, router, navigationState?.key]);
+
+
+    useEffect(() => {
+        setColorScheme("dark");
+    }, []);
+
+    if (isDbLoading) {
+        return (
+            <View style={{ flex: 1, backgroundColor: 'black', justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color="#E7872E" />
+            </View>
+        );
+    }
+
+
+    return (
+        <>
+            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                <Button onPress={() => signOut(auth)}></Button>
+                <Slot />
+
+                <PortalHost />
+            </ThemeProvider>
+        </>
+
+
+    );
+}

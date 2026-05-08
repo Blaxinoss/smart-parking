@@ -8,7 +8,6 @@ import Toast from 'react-native-toast-message';
 import { useRouter } from 'expo-router'; // ضفنا الراوتر هنا
 import { auth } from '@/services/firebaseConfig';
 import Colors from '@/constants/Colors';
-import { useAuth } from '@/hooks/Auth';
 import { useQueryClient } from '@tanstack/react-query';
 // import { initPaymentSheet, presentPaymentSheet } from '@stripe/stripe-react-native';
 
@@ -24,7 +23,6 @@ export default function PaymentStep() {
             if (skipPayment === true) {
                 // const { data: stripeData } = await AxiosAPI.post('client/users/create-setup-intent');
                 // const clientSecret = stripeData.clientSecret;
-                // const clientSecret = "FakeclientId";
 
                 // const { error: initError } = await initPaymentSheet({
                 //     setupIntentClientSecret: clientSecret,

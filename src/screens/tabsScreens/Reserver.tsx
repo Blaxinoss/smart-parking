@@ -251,7 +251,7 @@ export const Reserver = ({ bottomSheetRef }: { bottomSheetRef: RefObject<BottomS
             startTime,
             endTime,
             paymentTypeDecision: paymentType,
-            paymentMethodId: "pm_1T71qaQVzgGqWHEyRCRJigsd",
+            // paymentMethodId: "pm_1T71qaQVzgGqWHEyRCRJigsd",
             isImmediate: isReservingNow ? true : false
           })
         }}

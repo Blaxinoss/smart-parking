@@ -1,9 +1,9 @@
-import { ReactElement, useState } from "react";
-import { Text, TextInput, TextInputProps, View } from "react-native";
-import { StyledText } from "./styledText";
 import Colors from "@/constants/Colors";
 import { LucideIcon } from "lucide-react-native";
+import { useState } from "react";
+import { Text, TextInput, TextInputProps, View } from "react-native";
 import { iconSizes, sizes } from "../../constants/reusables";
+import { StyledText } from "./styledText";
 
 
 const states = {
@@ -100,7 +100,7 @@ export default function InputFieldNaked({
 
                 <View className="flex-col flex-1 ">
                     <View className="justify-center">
-                        {headerLabel && (
+                        {Boolean(headerLabel) && (
                             <View style={{ height: 20, justifyContent: 'center' }}>
                                 <StyledText
                                     className="ml-2 mb-4 font-titillium-bold"
@@ -110,14 +110,11 @@ export default function InputFieldNaked({
                                         color: isError ? Colors.danger[900] : (isFocused ? "#E7872E" : "#525252"),
                                     }}
                                 >
-                                    {label}
-                                </StyledText>
-                            </View>
-                        )}
-                    </View>
+                                    {headerLabel}
+                                </StyledText></View>
+                        )}</View>
 
-                    <TextInput
-                        className={`rounded-xl px-2 ${className}`}
+                    <TextInput className={`rounded-xl px-2 ${className}`}
                         {...props}
                         value={value}
                         onChangeText={onChangeText}
@@ -140,12 +137,8 @@ export default function InputFieldNaked({
                             textAlignVertical: 'center',
                             outline: "none"
                         }}
-                    />
-                </View>
-
+                    /></View>
                 {children}
-
-                {/* Right Icon */}
                 {Icon && IconDi === "right" && (
                     <Icon color={isError ? "#ef4444" : isFocused ? "white" : "gray"} size={iconSizes[size]} />
                 )}

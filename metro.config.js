@@ -11,16 +11,27 @@ config.resolver.unstable_conditionNames = [
     "development",
 ];
 
+const nativeOnlyLibraries = [
+    'react-native-maps',
+    '@stripe/stripe-react-native'
+];
+
+
 const ALIASES = {
     tslib: "tslib/tslib.es6.js",
 };
 
 config.resolver.resolveRequest = (context, moduleName, platform) => {
-    return context.resolveRequest(
-        context,
-        ALIASES[moduleName] ?? moduleName,
-        platform
-    );
+
+    if (platform === "web" && nativeOnlyLibraries.includes(moduleName)) {
+        return { type: 'empty' };
+    } else {
+        return context.resolveRequest(
+            context,
+            ALIASES[moduleName] ?? moduleName,
+            platform
+        );
+    }
 };
 
 // 2. اربط NativeWind بالإعدادات دي

@@ -50,6 +50,7 @@ export interface User {
     licenseNumber: string;
     paymentGatewayToken?: string | null;
     notificationToken?: string | null;
+    notificationAllowed: boolean;
     licenseExpiry: Date | string;
     hasOutstandingDebt: boolean;
     createdAt: Date | string;
@@ -107,7 +108,9 @@ export interface ParkingSession {
 
 export interface PaymentTransaction {
     id: number;
-    parkingSessionId: number;
+    parkingSessionId?: number | null;
+    userId?: number;
+    reservationId?: number | null;
     amount: number;
     paymentMethod?: PaymentMethod | null;
     paidAt?: Date | string | null;
@@ -115,6 +118,58 @@ export interface PaymentTransaction {
     createdAt: Date | string;
 }
 
+
+export interface IAlert {
+    _id: string;
+    alert_type: AlertType
+    severity: AlertSeverity
+    description: string;
+    details: {
+        reservationId: number;
+        userId: number;
+        slotId: string;
+    };
+    status: 'pending' | 'resolved' | 'acknowledged';
+    timestamp: Date;
+    createdAt: Date;
+    updatedAt: Date;
+    __v: number;
+}
+
+
+
+export enum ViolationType {
+    UNAUTHORIZED = 'unauthorized',
+    OVERTIME = 'overtime',
+    WRONG_SPOT = 'wrong_spot',
+    BLOCKED_ENTRY = 'blocked_entry',
+    OTHER = 'other'
+}
+
+export enum AlertType {
+    VIOLATION = 'violation',
+    OVERTIME = 'overtime',
+    MAINTENANCE_NEEDED = 'maintenance_needed',
+    CAMERA_OFFLINE = 'camera_offline',
+    SUSPICIOUS_ACTIVITY = 'suspicious_activity',
+    SLOT_CONFLICT = 'slot_conflict',
+    NO_SHOW = 'no_show',
+    PAYMENT_HELP_REQUEST = 'payment_help_request',
+}
+
+export enum AlertSeverity {
+    LOW = 'low',
+    MEDIUM = 'medium',
+    HIGH = 'high',
+    CRITICAL = 'critical'
+}
+
+export enum AlertStatus {
+    PENDING = 'pending',
+    ACKNOWLEDGED = 'acknowledged',
+    RESOLVED = 'resolved',
+    DISMISSED = 'dismissed'
+}
 
 
 export enum SlotStatus {
@@ -136,7 +191,7 @@ export interface ISlotStats {
 
 export interface ICurrentVehicle {
     plate_number?: string;
-    occupied_since?: string; // Date -> string
+    occupied_since?: string | Date; // Date -> string
     expected_exit?: string; // Date -> string
     reservation_id?: string;
 }
@@ -146,8 +201,8 @@ export interface IConflictDetails {
     assigned_session_id?: string;
 }
 
-// 2. الواجهة الرئيسية للـ Slot
 export interface IParkingSlot {
+    type: "REGULAR" | "EMERGENCY";
     _id: string;
     status: SlotStatus;
     current_vehicle?: ICurrentVehicle;

@@ -1,15 +1,15 @@
-import React, { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
-import Toast, { ReactChildren } from "react-native-toast-message";
-import { io, Socket } from 'socket.io-client'
-import { useUser } from "./useUsers";
 import * as Haptics from 'expo-haptics';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import Toast from "react-native-toast-message";
+import { io, Socket } from 'socket.io-client';
+import { useUser } from "./useUsers";
 
-import { CANCELED_RESERVATION_EMITTER_MESSAGE, HANDLE_GATE_EXIT_EMIT, HANDLE_HAS_DONE_VIOLATION, HANDLE_SLOT_ENTER_EMIT, HANDLE_SLOT_EXIT_EMIT, HANDLE_SLOT_HAS_BEEN_OVERTAKEN, ngrok, SESSION_SLOT_NOT_OCCUPIED_BEFORE_TOLERANCETIME, SLOT_STATUS_CHANGED_MESSAGE } from "@/constants/constants";
-import { handleCancel } from "@/onSocketEventsHandlers/onCancelHandler";
-import { useQueryClient } from "@tanstack/react-query";
-import { handleSlotStatusChange } from "@/onSocketEventsHandlers/onSlotStatusChangeHandler";
-import { useRouter } from "expo-router";
+import { CANCELED_RESERVATION_EMITTER_MESSAGE, DEBT_CLEARED, HANDLE_GATE_EXIT_EMIT, HANDLE_HAS_DONE_VIOLATION, HANDLE_SLOT_ENTER_EMIT, HANDLE_SLOT_EXIT_EMIT, HANDLE_SLOT_HAS_BEEN_OVERTAKEN, ngrok, SESSION_SLOT_NOT_OCCUPIED_BEFORE_TOLERANCETIME, SLOT_STATUS_CHANGED_MESSAGE, USER_DATA_UPDATED } from "@/constants/constants";
 import { ParkingSession } from "@/constants/types";
+import { handleCancel } from "@/onSocketEventsHandlers/onCancelHandler";
+import { handleSlotStatusChange } from "@/onSocketEventsHandlers/onSlotStatusChangeHandler";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 
 
 
@@ -193,6 +193,38 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
             })
             queryClient.invalidateQueries({ queryKey: ["userSessions"] });
         });
+
+        mySocket.on(DEBT_CLEARED, (data: { message: string }) => {
+            console.log("🔥 SOCKET RECEIVED DEBT_CLEARED EVENT!", data);
+
+            Toast.show({
+                type: "success",
+                text1: "Debt cleared!",
+                text2: data.message,
+                visibilityTime: 5000,
+            });
+
+        })
+        /* -------------------------------------------------- */
+        /*  🆕 User data updated by admin                      */
+        /*  (role change, debt status, notification settings)  */
+        /* -------------------------------------------------- */
+        mySocket.on(USER_DATA_UPDATED, (data: { message: string, updatedFields: string[] }) => {
+            console.log("[SOCKET EVENT] : User data updated by admin", data.updatedFields);
+
+            // Refetch user data silently so the app reflects the new state
+            queryClient.invalidateQueries({ queryKey: ["user"] });
+            queryClient.invalidateQueries({ queryKey: ["userSessions"] });
+
+            Toast.show({
+                type: "info",
+                text1: "Account Updated",
+                text2: data.message || "Your account information has been updated.",
+                visibilityTime: 4000,
+            });
+        });
+
+
 
 
 

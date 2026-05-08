@@ -7,7 +7,7 @@ import { Callout, Circle, Marker } from "react-native-maps"
 
 
 
-export const GarageDestination = ({ bottomSheetRef }: { bottomSheetRef: React.RefObject<BottomSheet> }) => {
+export const GarageDestination = ({ bottomSheetRef }: { bottomSheetRef: React.RefObject<BottomSheet | null> }) => {
     const { FIXED_MAYCHANGE_DEST } = useLocationHook();
 
 

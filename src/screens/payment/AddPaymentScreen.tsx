@@ -57,7 +57,7 @@ export function AddPaymentScreen() {
                 text2: 'Your card has been added successfully'
             })
 
-            router.replace('/(tabs)');
+            router.push('/(tabs)');
 
 
         } catch (error: any) {
