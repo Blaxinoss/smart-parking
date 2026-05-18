@@ -1,13 +1,13 @@
-import { Link, useRouter } from "expo-router";
-import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithCredential } from "firebase/auth";
-import { useState } from "react";
-import { View } from "react-native";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { app } from "../../services/firebaseConfig";
-import { Terminal, UserRoundKey } from "lucide-react-native";
-import { StyledText } from "@/components/ui/styledText";
 import Button from "@/components/ui/buttonfg";
 import DismissKeyboardView from "@/components/ui/DismissKeyboardView";
+import { StyledText } from "@/components/ui/styledText";
+import { Link, useRouter } from "expo-router";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { Terminal, UserRoundKey } from "lucide-react-native";
+import { useState } from "react";
+import { View } from "react-native";
+import { app } from "../../services/firebaseConfig";
 
 import InputFieldNaked from "@/components/ui/inputNaked";
 
@@ -82,7 +82,7 @@ export default function Login() {
     return (
         <DismissKeyboardView>
             <View className="flex-1 p-6 justify-center bg-black"> {/* أضفت bg-black لتناسب ثيم الـ Input */}
-                <StyledText className="text-3xl font-titillium-bold mb-8 text-center text-white">
+                <StyledText className="text-3xl font-titillium-bold mb-8 justify-center w-full text-center text-white">
                     Smart Parking
                 </StyledText>
 

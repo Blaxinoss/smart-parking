@@ -1,5 +1,5 @@
 export const CANCELED_RESERVATION_EMITTER_MESSAGE = "CANCELED_RESERVATION";
-export const ngrok = "https://gale-untraumatic-estella.ngrok-free.dev"
+export const ngrok = "https://small-mangos-wave.loca.lt"
 export const SLOT_STATUS_CHANGED_MESSAGE = "SLOT_STATUS_CHANGED"
 export const VERIFYING_PLATE_GATE_ENTRY = "VERIFYING_PLATE_GATE_ENTRY";
 export const DECISION_GATE_ENTRY_EMIT = "DECISION_GATE_ENTRY_EMIT";

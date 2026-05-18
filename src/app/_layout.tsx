@@ -92,41 +92,105 @@ function RootLayoutNav() {
   const navigationState = useRootNavigationState();
 
   const { data: userData, isLoading } = useUser()
+  const inAuthGroup = segments[0] === '(auth)';
+  const inOnboardingStackGroup = segments[0] === '(onboard)';
+  const inTabs = segments[0] === '(tabs)';
+  const inAdmin = segments[0] === '(admin)'
 
+  // 📝 كونسول لوج عام مع كل إعادة رندر عشان تتابع الـ State اللحظية
+  console.log('--- 🔄 [RENDER TRIGGERED] ---', {
+    currentSegment: segments[0] || 'root',
+    isFirebaseLoading,
+    isBackendLoading: isLoading,
+    hasFirebaseUser: !!firebaseUser,
+    hasUserData: !!userData,
+    userRole: userData?.role || 'NONE',
+    isNavReady: !!navigationState?.key
+  });
   useEffect(() => {
+    console.log('🚀 [useEffect - Auth/Redirect Logic Started]');
 
+    if (!navigationState?.key) {
+      console.log('🛑 [Redirect Guard]: Navigation state is NOT ready yet. Skipping redirect.');
+      return;
+    }
 
-    const inAuthGroup = segments[0] === '(auth)';
-    const inOnboardingStackGroup = segments[0] === '(onboard)';
-
-    if (isFirebaseLoading || !navigationState?.key || isLoading) return;
-
-
-
-    if (!firebaseUser && !inAuthGroup) {
+    if (!firebaseUser) {
+      console.log('ℹ️ [Auth Status]: No firebaseUser found.');
       if (!inAuthGroup) {
+        console.log('➡️ [Redirecting]: Guest trying to access protected route. Moving to -> /(auth)/login');
         router.replace('/(auth)/login');
-      }
-
-    } else if (firebaseUser && !userData) {
-      if (!inOnboardingStackGroup) {
-        router.replace('/(onboard)');
-      }
-    } else if (firebaseUser && userData) {
-      if (inAuthGroup || inOnboardingStackGroup) {
-        router.replace('/(tabs)')
+      } else {
+        console.log('✅ [Stay]: Guest is already in Auth Group.');
       }
     }
 
+    else if (firebaseUser && !userData) {
+      console.log('ℹ️ [Auth Status]: Firebase User exists, but Backend userData is missing.');
+      if (!inOnboardingStackGroup) {
+        console.log('➡️ [Redirecting]: User needs onboarding. Moving to -> /(onboard)');
+        router.replace('/(onboard)');
+      } else {
+        console.log('✅ [Stay]: User is already in Onboarding Group.');
+      }
+    }
+
+    else if (firebaseUser && userData) {
+      console.log(`ℹ️ [Auth Status]: Logged in. Role: [${userData.role}]`);
+
+      // التحقق من الحلقات المفرغة أو التوجيه للأماكن الصحيحة
+      if (inAuthGroup || inOnboardingStackGroup || (inTabs && userData.role === 'ADMIN') || (inAdmin && userData.role !== 'ADMIN')) {
+        if (userData.role === 'ADMIN') {
+          console.log('➡️ [Redirecting]: Admin found in wrong stack. Moving to -> /(admin)');
+          router.replace('/(admin)/index');
+        } else {
+          console.log('➡️ [Redirecting]: Regular user found in wrong stack. Moving to -> /(tabs)');
+          router.replace('/(tabs)');
+        }
+      } else {
+        console.log(`✅ [Stay]: User is in the correct group for role: ${userData.role}`);
+      }
+    }
 
   }, [firebaseUser, isLoading, segments, isFirebaseLoading, userData, router, navigationState?.key]);
 
 
   useEffect(() => {
     setColorScheme("dark");
+  }, [colorScheme]);
 
-  }, [colorScheme])
   const isAppLoading = isLoading || isFirebaseLoading;
+
+  // 2. كونسول لوجز داخل بوابات الحماية (Render Guards) عشان تعرف مين اللي معلق الشاشة
+
+  // البوابة أ: تحميل الداتا الأساسية أو الـ Navigation لسه مجاش
+  if (isFirebaseLoading || !navigationState?.key) {
+    console.log('⏳ [Render Guard A]: Freezing screen via ActivityIndicator because:', {
+      isFirebaseLoading,
+      isNavReady: !!navigationState?.key
+    });
+    return <ActivityIndicator size="large" color="#E7872E" style={{ flex: 1, backgroundColor: 'black' }} />;
+  }
+
+  // البوابة ب: لو مش مسجل دخول وبيحاول يشوف صفحة محمية
+  if (!firebaseUser && !inAuthGroup) {
+    console.log('⏳ [Render Guard B]: Freezing screen. Guest user trying to view protected segment:', segments[0]);
+    return <ActivityIndicator size="large" color="#E7872E" style={{ flex: 1, backgroundColor: 'black' }} />;
+  }
+
+  // البوابة ج: مسجل دخول بس داتا الـ backend لسه بتحمل وهو بره الـ Onboarding
+  if (firebaseUser && isLoading && !inOnboardingStackGroup && !inAuthGroup) {
+    console.log('⏳ [Render Guard C]: Freezing screen. Waiting for backend useUser() data to load...');
+    return <ActivityIndicator size="large" color="#E7872E" style={{ flex: 1, backgroundColor: 'black' }} />;
+  }
+
+  // البوابة د: حارس الأمن ضد التسلل لصفحة الأدمن
+  if (inAdmin && userData?.role !== 'ADMIN') {
+    console.log(`🚨 [Render Guard D]: Access Denied! Role [${userData?.role}] tried to access /(admin). Freezing until redirected.`);
+    return <ActivityIndicator size="large" color="#E7872E" style={{ flex: 1, backgroundColor: 'black' }} />;
+  }
+
+  console.log('✨ [SUCCESS RENDERING]: All guards passed, rendering <Slot /> now.');
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

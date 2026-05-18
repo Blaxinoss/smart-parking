@@ -4,11 +4,12 @@ import {
     FlatList,
     Modal,
     Pressable,
-    Text,
     TextInput,
     TextInputProps,
-    View,
+    View
 } from "react-native";
+
+import { StyledText as Text } from "@/components/ui/styledText";
 
 interface Option {
     label: string;
@@ -52,7 +53,7 @@ export default function FormField({
                         flexDirection: "row", alignItems: "center", justifyContent: "space-between",
                         paddingHorizontal: 14, borderRadius: 14,
                         borderWidth: 0.5, borderColor,
-                        backgroundColor: "#111", height: 50,
+                        backgroundColor: "#041524", height: 50,
                     }}
                 >
                     <Text style={{
@@ -137,7 +138,7 @@ export default function FormField({
                     borderRadius: 14,
                     borderWidth: 0.5,
                     borderColor,
-                    backgroundColor: "#111",
+                    backgroundColor: "#1f1f1f",
                     color: "#e8e8e8",
                     fontFamily: "Titillium_400Regular",
                     fontSize: 15,

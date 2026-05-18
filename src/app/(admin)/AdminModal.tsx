@@ -1,3 +1,4 @@
+import { StyledText as Text } from "@/components/ui/styledText";
 import { X } from "lucide-react-native";
 import React, { useEffect } from "react";
 import { Controller, DefaultValues, FieldValues, Resolver, useForm } from "react-hook-form";
@@ -8,7 +9,6 @@ import {
     Platform,
     Pressable,
     ScrollView,
-    Text,
     View,
 } from "react-native";
 
@@ -79,6 +79,7 @@ export default function AdminModal<T extends FieldValues>({
     const onError = (errors: any) => console.log("Validation Errors:", errors);
     return (
         <Modal
+
             visible={visible}
             transparent
             animationType="slide"
@@ -99,7 +100,7 @@ export default function AdminModal<T extends FieldValues>({
                     borderTopLeftRadius: 28, borderTopRightRadius: 28,
                     borderTopWidth: 0.5, borderLeftWidth: 0.5, borderRightWidth: 0.5,
                     borderColor: "#1e1e1e",
-                    maxHeight: "90%",
+                    maxHeight: "50%",
                 }}>
                     {/* drag handle */}
                     <View style={{ alignItems: "center", paddingTop: 12, paddingBottom: 4 }}>
@@ -178,6 +179,7 @@ export default function AdminModal<T extends FieldValues>({
                     <View style={{
                         paddingHorizontal: 20, paddingTop: 12, paddingBottom: 32,
                         gap: 10, borderTopWidth: 0.5, borderTopColor: "#1e1e1e",
+                        flexDirection: "row"
                     }}>
                         <Pressable
                             onPress={handleSubmit(onSubmit, (errors) => {
@@ -186,6 +188,7 @@ export default function AdminModal<T extends FieldValues>({
                             style={({ pressed }) => ({
                                 backgroundColor: pressed ? "#cc7626" : "#E7872E",
                                 borderRadius: 16, height: 50,
+                                flex: 1,
                                 alignItems: "center", justifyContent: "center",
                             })}
                         >
@@ -199,6 +202,8 @@ export default function AdminModal<T extends FieldValues>({
                             style={({ pressed }) => ({
                                 backgroundColor: pressed ? "#161616" : "#111",
                                 borderWidth: 0.5, borderColor: "#2a2a2a",
+                                flex: 1,
+
                                 borderRadius: 16, height: 48,
                                 alignItems: "center", justifyContent: "center",
                             })}

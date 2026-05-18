@@ -3,8 +3,8 @@ import { ParkingSquare, Pencil, Plus, Trash2 } from "lucide-react-native";
 import React, { useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
 import { z } from "zod";
+import { useAdminSlots, useCreateSlot, useDeleteSlot, useUpdateSlot } from "../../services/useAdminApi";
 import AdminModal, { FieldConfig } from "./AdminModal";
-import { useAdminSlots, useCreateSlot, useDeleteSlot, useUpdateSlot } from "./useAdminApi";
 
 const slotSchema = z.object({
     // Using _id because your FlatList uses item._id and your delete mutation uses _id

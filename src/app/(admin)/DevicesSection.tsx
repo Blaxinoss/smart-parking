@@ -2,14 +2,14 @@ import { Cpu, Pencil, Plus, Trash2 } from "lucide-react-native";
 import React, { useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
 import { z } from "zod";
+import { Device, useAdminDevices, useCreateDevice, useDeleteDevice, useUpdateDevice } from "../../services/useAdminApi";
 import AdminModal, { FieldConfig } from "./AdminModal";
-import { Device, useAdminDevices, useCreateDevice, useDeleteDevice, useUpdateDevice } from "./useAdminApi";
 
 const deviceSchema = z.object({
     name: z.string().min(1, "Name is required"),
     type: z.enum(["SENSOR", "CAMERA", "GATE"]),
     status: z.enum(["online", "offline"]),  // ✅ lowercase
-    slotId: z.string().optional(),
+    slotId: z.string().optional().nullable(),
 });
 type DeviceForm = z.infer<typeof deviceSchema>;
 
@@ -44,7 +44,7 @@ export default function DevicesSection() {
 
     const handleDelete = (device: Device) => {
         if (confirm("are you sure?")) {
-            deleteDevice.mutate(device.id)
+            deleteDevice.mutate(device._id)
         }
 
     };
@@ -80,7 +80,7 @@ export default function DevicesSection() {
             ) : (
                 <FlatList
                     data={devices ?? []}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item) => item._id}
                     contentContainerStyle={{ paddingBottom: 100 }}
                     ListEmptyComponent={
                         <EmptyState title="No devices yet" subtitle="Add the first device to connect the hardware layer." />
@@ -143,13 +143,13 @@ export default function DevicesSection() {
                 visible={!!editTarget}
                 onClose={() => setEditTarget(null)}
                 title="Edit Device"
-                subtitle={editTarget?.id}
+                subtitle={editTarget?._id}
                 schema={deviceSchema}
                 fields={fields}
                 defaultValues={editTarget ? { name: editTarget.name, type: editTarget.type, status: editTarget.status, slotId: editTarget.slotId } : undefined}
                 onSubmit={(data) => {
                     if (!editTarget) return;
-                    updateDevice.mutate({ id: editTarget.id, ...data }, { onSuccess: () => setEditTarget(null) });
+                    updateDevice.mutate({ id: editTarget._id, ...data }, { onSuccess: () => setEditTarget(null) });
                 }}
                 isLoading={updateDevice.isPending}
                 submitLabel="Save Changes"

@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useState } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { auth } from '../services/firebaseConfig';
 
 const AuthContext = createContext<{
@@ -17,7 +17,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             setFirebaseUser(user);
-            setisFirebaseLoading(false); // أول ما فايربيز يرد، بنقفل اللودينج
+            setisFirebaseLoading(false);
         });
 
         return unsubscribe;

@@ -2,8 +2,8 @@ import { DoorClosed, DoorOpen, Pencil } from "lucide-react-native";
 import React, { useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
 import { z } from "zod";
+import { Gate, useAdminGates, useForceGateCommand, useUpdateGate } from "../../services/useAdminApi";
 import AdminModal, { FieldConfig } from "./AdminModal";
-import { Gate, useAdminGates, useUpdateGate } from "./useAdminApi";
 
 const gateSchema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -33,13 +33,21 @@ const fields: FieldConfig[] = [
 export default function GatesSection() {
     const { data: gates, isLoading } = useAdminGates();
     const updateGate = useUpdateGate();
+    const forceGateCommand = useForceGateCommand();
     const [editTarget, setEditTarget] = useState<Gate | null>(null);
 
     const toggleGate = (gate: Gate) => {
-        const newStatus = gate.status === "OPEN" ? "CLOSED" : "OPEN";
+        const newStatus = gate.status === "OPEN" ? "CLOSE" : "OPEN";
 
-        updateGate.mutate({ id: gate.id, status: newStatus });
+        forceGateCommand.mutate({
+            gateId: gate.id,
+            command: newStatus,
+            type: gate.type === "ENTRY" ? "enter" : "exit",
+            reason: "ADMIN_OVERRIDE"
+        });
+
     };
+
 
     return (
         <View style={{ flex: 1, backgroundColor: "#0a0a0a", paddingHorizontal: 16, paddingTop: 16 }}>

@@ -6,6 +6,7 @@ import {
     CalendarClock,
     Cpu,
     CreditCard,
+    DoorClosed,
     DoorOpen,
     LayoutDashboard,
     ParkingSquare,
@@ -19,13 +20,6 @@ import {
 import React, { useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AlertsSection from "./AlertsSection";
-import DevicesSection from "./DevicesSection";
-import GatesSection from "./GatesSection";
-import ReservationsSection from "./ReservationsSection";
-import SessionsSection from "./SessionsSection";
-import SlotsSection from "./SlotsSection";
-import TransactionsSection from "./TransactionsSection";
 import {
     useAdminAlerts,
     useAdminDevices,
@@ -35,7 +29,14 @@ import {
     useAdminSlots,
     useAdminTransactions,
     useAdminUsers,
-} from "./useAdminApi";
+} from "../../services/useAdminApi";
+import AlertsSection from "./AlertsSection";
+import DevicesSection from "./DevicesSection";
+import GatesSection from "./GatesSection";
+import ReservationsSection from "./ReservationsSection";
+import SessionsSection from "./SessionsSection";
+import SlotsSection from "./SlotsSection";
+import TransactionsSection from "./TransactionsSection";
 import UsersSection from "./UsersSection";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -233,6 +234,7 @@ export default function AdminDashboard() {
         />
       </View>
 
+<<<<<<< HEAD
       {/* Quick actions */}
       <Text
         style={{
@@ -278,6 +280,20 @@ export default function AdminDashboard() {
           onPress={() => signOut(auth)}
         />
       </View>
+=======
+            {/* Quick actions */}
+            <Text style={{ color: "#fc9433", fontSize: 13, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
+                Quick actions
+            </Text>
+            <View style={{ flexDirection: "row", gap: 8, marginBottom: 24 }}>
+                <QuickAction icon={<Plus size={16} color="#E7872E" />} label="New slot" tint="#E7872E" onPress={() => setActiveSection("slots")} />
+                <QuickAction icon={<UserPlus size={16} color="#64a0ff" />} label="Add user" tint="#64a0ff" onPress={() => setActiveSection("users")} />
+                <QuickAction icon={<BellRing size={16} color="#F97C7C" />} label="Alerts" tint="#F97C7C" onPress={() => setActiveSection("alerts")} badge={unresolvedAlerts > 0 ? unresolvedAlerts : undefined} />
+                <QuickAction icon={<DoorOpen size={16} color="#50c882" />} label="Gates" tint="#50c882" onPress={() => setActiveSection("gates")} />
+                <QuickAction icon={<DoorClosed size={16} color="#50c882" />} label="Sign out" tint="#50c882" onPress={() => signOut(auth)} />
+
+            </View>
+>>>>>>> ce92fe0add12cd2dab9be933b0c8c1748092305d
 
       {/* Management list */}
       <Text
@@ -292,6 +308,7 @@ export default function AdminDashboard() {
         Management
       </Text>
 
+<<<<<<< HEAD
       <DarkSectionRow
         icon={<Users size={17} color="#E7872E" />}
         tint="#E7872E"
@@ -334,6 +351,68 @@ export default function AdminDashboard() {
       />
     </ScrollView>
   );
+=======
+            <DarkSectionRow
+                icon={<Users size={17} color="#E7872E" />}
+                tint="#E7872E"
+                title="Users"
+                subtitle="Accounts and roles"
+                count={users?.length}
+                onPress={() => setActiveSection("users")}
+            />
+            <DarkSectionRow
+                icon={<ParkingSquare size={17} color="#64a0ff" />}
+                tint="#64a0ff"
+                title="Parking slots"
+                subtitle="Status and config"
+                count={slots?.length}
+                onPress={() => setActiveSection("slots")}
+            />
+
+            <DarkSectionRow
+                icon={<CalendarClock size={17} color="#f472b6" />}
+                tint="#f472b6"
+                title="Reservations"
+                subtitle="Upcoming and pending"
+                count={reservations?.length}
+                onPress={() => setActiveSection("reservations")}
+            />
+            <DarkSectionRow
+                icon={<CreditCard size={17} color="#34d399" />}
+                tint="#34d399"
+                title="Transactions"
+                subtitle="Payments and refunds"
+                count={transactions?.length}
+                onPress={() => setActiveSection("transactions")}
+            />
+
+            <DarkSectionRow
+                icon={<Timer size={17} color="#50c882" />}
+                tint="#50c882"
+                title="Sessions"
+                subtitle="Live and completed"
+                count={sessions?.length}
+                onPress={() => setActiveSection("sessions")}
+            />
+            <DarkSectionRow
+                icon={<Cpu size={17} color="#a78bfa" />}
+                tint="#a78bfa"
+                title="Devices"
+                subtitle="Sensors and cameras"
+                count={devices?.length}
+                onPress={() => setActiveSection("devices")}
+            />
+            <DarkSectionRow
+                icon={<DoorOpen size={17} color="#50c882" />}
+                tint="#50c882"
+                title="Gates"
+                subtitle="Entry and exit control"
+                count={gates?.length}
+                onPress={() => setActiveSection("gates")}
+            />
+        </ScrollView>
+    );
+>>>>>>> ce92fe0add12cd2dab9be933b0c8c1748092305d
 
   const ReservationsTab = () => (
     <ScrollView

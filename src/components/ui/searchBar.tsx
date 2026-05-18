@@ -4,6 +4,7 @@ import { TextInput, TextInputProps, View } from "react-native";
 
 interface SearchBarProps extends TextInputProps {
     IconDi?: "left" | "right";
+    bgOutter?: string;
 }
 
 export default function SearchBar({
@@ -12,6 +13,7 @@ export default function SearchBar({
     placeholder = "Search...",
     className,
     IconDi = "left", // القيمة الافتراضية هي اليسار
+    bgOutter,
     ...props
 }: SearchBarProps) {
     const [isFocused, setIsFocused] = useState(false);
@@ -29,7 +31,7 @@ export default function SearchBar({
         <View className="w-full max-w-[500px] mx-auto my-2">
             <View
                 className={`
-                    flex flex-row items-center px-4 w-full rounded-2xl border bg-white
+                    flex flex-row items-center px-4 w-full rounded-2xl border ${bgOutter ? bgOutter : "bg-white"}
                     ${isFocused ? "border-[#E7872E]" : "border-slate-200"} 
                 `}
                 style={{ height: 55 }}

@@ -1,15 +1,14 @@
-import { View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
+import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { useOnboarding } from './_layout';
 
+import Button from '@/components/ui/buttonfg';
 import InputFieldNaked from '@/components/ui/inputNaked';
 import { StyledText } from '@/components/ui/styledText';
-import Button from '@/components/ui/buttonfg';
-import { User, Phone, MapPin, IdCard, Calendar, IdCardLanyard } from 'lucide-react-native';
-import DateTimePicker from '@react-native-community/datetimepicker'
+import { Calendar, IdCard, IdCardLanyard, MapPin, Phone, User } from 'lucide-react-native';
+import { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
-import { useState } from 'react';
 
 // 1. تعريف القوانين (Schema) بره الكومبوننت لأداء أفضل
 const UserInfoSchema = z.object({
