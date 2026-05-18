@@ -27,14 +27,6 @@ export {
     ErrorBoundary
 } from "expo-router";
 
-<<<<<<< HEAD
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: "(admin)",
-};
-=======
-
->>>>>>> ce92fe0add12cd2dab9be933b0c8c1748092305d
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -82,38 +74,6 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-<<<<<<< HEAD
-  const router = useRouter();
-  const { colorScheme, setColorScheme } = useColorScheme();
-
-  const segments = useSegments();
-  const { firebaseUser, isFirebaseLoading } = useAuth();
-  const { data: dbUser, isLoading: isDbLoading } = useUser();
-  const navigationState = useRootNavigationState();
-
-  useEffect(() => {
-    const inAuthGroup = segments[0] === "(auth)";
-    const inOnboardingStackGroup = segments[0] === "(onboard)";
-
-    if (isFirebaseLoading || !navigationState?.key || isDbLoading) return;
-
-    if (!firebaseUser && !inAuthGroup) {
-      if (!inAuthGroup) {
-        router.replace("/(auth)/login");
-      }
-    } else if (firebaseUser && !dbUser) {
-      if (!inOnboardingStackGroup) {
-        router.replace("/(onboard)");
-      }
-    } else if (firebaseUser && !dbUser) {
-      if (!inOnboardingStackGroup) {
-        router.replace("/(onboard)");
-      }
-    } else if (firebaseUser && dbUser) {
-      if (inAuthGroup || inOnboardingStackGroup) {
-        router.replace("/(admin)");
-      }
-=======
     const router = useRouter();
     const { colorScheme, setColorScheme } = useColorScheme();
 
@@ -175,7 +135,6 @@ function RootLayoutNav() {
                 <ActivityIndicator size="large" color="#E7872E" />
             </View>
         );
->>>>>>> ce92fe0add12cd2dab9be933b0c8c1748092305d
     }
   }, [
     firebaseUser,
@@ -193,18 +152,6 @@ function RootLayoutNav() {
 
   if (isDbLoading) {
     return (
-<<<<<<< HEAD
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "black",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <ActivityIndicator size="large" color="#E7872E" />
-      </View>
-=======
         <>
             <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                 <Button onPress={() => signOut(auth)}>Sing Out</Button>
@@ -214,7 +161,6 @@ function RootLayoutNav() {
             </ThemeProvider>
         </>
 
->>>>>>> ce92fe0add12cd2dab9be933b0c8c1748092305d
     );
   }
 
