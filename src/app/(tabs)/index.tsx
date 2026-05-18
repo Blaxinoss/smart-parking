@@ -5,13 +5,14 @@ import BottomSheet, { useBottomSheetSpringConfigs } from '@gorhom/bottom-sheet';
 import { ReservationManager } from '@/screens/tabsScreens/ReservationManager';
 import Colors from '@/constants/Colors';
 import { useUserReservations } from '@/hooks/useReservations';
+import { useSlots } from '@/hooks/useSlots';
 import { SplitSquareVertical, Bell } from 'lucide-react-native';
 import { Icon } from '@/components/ui/icon';
 import SlotsGrid from '@/screens/slots/slotGrid';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 
 import { useUserSessions } from '@/hooks/useSessions';
-import { LocationMapParent } from '@/screens/LocationMapParent';
+import LocationMapParent from '../../screens/LocationMapParent';
 import DebtBanner from '@/screens/tabsScreens/DebtBanner';
 import { useUser } from '@/hooks/useUsers';
 import { DebtBannerGrid } from '@/screens/tabsScreens/DebtBannerGrid';
@@ -25,13 +26,14 @@ export default function TabOneScreen() {
   const [isSlotsShown, setIsSlotsShown] = useState(false);
   const [isNotificationsShown, setIsNotificationsShown] = useState(false); // 👈 State للإشعارات
   const { data: reservation, isLoading: isLoadingReservations } = useUserReservations();
+  const { data: slots, isLoading: isLoadingSlots } = useSlots();
   const { data: session, isLoading: isLoadingSession } = useUserSessions();
   const [shouldSessionStart, setShouldSessionStart] = useState(false);
 
 
 
 
-  const bottomSheetRef = useRef<BottomSheet>(null);
+  const bottomSheetRef = useRef<BottomSheet | null>(null);
   const snapPoints = ['25%', '50%', '80%'];
 
   const animationConfigs = useBottomSheetSpringConfigs({
@@ -109,7 +111,7 @@ export default function TabOneScreen() {
       )}
 
 
-      <SlotsGrid SharedStyles={AnimatedStyle} />
+      <SlotsGrid SharedStyles={AnimatedStyle} slots={slots} isLoading={isLoadingSlots} />
       <Pressable
         onPress={() => {
           const newState = !isSlotsShown;
@@ -179,13 +181,12 @@ export default function TabOneScreen() {
         handleIndicatorStyle={{ backgroundColor: Colors.main[950], width: 40, boxShadow: '0px 2px 15px 3px rgba(231, 135, 46, 0.8)' }} >
 
         <ReservationManager
-          isLoading={isLoadingReservations}
+          isLoadingReservation={isLoadingReservations}
           reservation={reservation}
           bottomSheetRef={bottomSheetRef}
           shouldSessionStart={shouldSessionStart}
-          session={session}
+          session={session ?? null}
           isLoadingSession={isLoadingSession}
-          isLoadingReservation={isLoadingReservations}
         />
 
 

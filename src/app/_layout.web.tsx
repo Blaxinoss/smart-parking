@@ -9,24 +9,22 @@ import { PortalHost } from "@rn-primitives/portal";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import {
-    Slot,
-    useRootNavigationState,
-    useRouter,
-    useSegments,
+  Slot,
+  useRootNavigationState,
+  useRouter,
+  useSegments,
 } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useColorScheme } from "nativewind";
 import React, { useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
 import "react-native-reanimated";
 import "../../global.css";
 import { DarkTheme, DefaultTheme } from "../components/Themed";
 
 export {
-    // Catch any errors thrown by the Layout component.
-    ErrorBoundary
+  // Catch any errors thrown by the Layout component.
+  ErrorBoundary
 } from "expo-router";
-
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -74,74 +72,50 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-    const router = useRouter();
-    const { colorScheme, setColorScheme } = useColorScheme();
+  const router = useRouter();
+  const { colorScheme, setColorScheme } = useColorScheme();
 
-    const segments = useSegments();
-    const { firebaseUser, isFirebaseLoading } = useAuth();
-    const { data: userData, isLoading: isDbLoading, isFetched } = useUser();
-    const navigationState = useRootNavigationState();
-    const inAuthGroup = segments[0] === '(auth)';
-    const inOnboardingStackGroup = segments[0] === '(onboard)';
-    const inTabs = segments[0] === '(tabs)';
+  const segments = useSegments();
+  const { firebaseUser, isFirebaseLoading } = useAuth();
+  const { data: userData, isLoading: isDbLoading, isFetched } = useUser();
+  const navigationState = useRootNavigationState();
+  const inAuthGroup = segments[0] === "(auth)";
+  const inOnboardingStackGroup = segments[0] === "(onboard)";
+  const inTabs = segments[0] === "(tabs)";
 
-    useEffect(() => {
+  useEffect(() => {
+    if (isFirebaseLoading || !navigationState?.key) return;
 
+    if (firebaseUser && isDbLoading) return;
 
+    if (firebaseUser && !isFetched && !userData) return;
 
-
-        if (isFirebaseLoading || !navigationState?.key) return;
-
-        if (firebaseUser && isDbLoading) return;
-
-        if (firebaseUser && !isFetched && !userData) return;
-
-        if (!firebaseUser && !inAuthGroup) {
-            if (!inAuthGroup) {
-                router.replace('/(auth)/login');
-            }
-
-        } else if (firebaseUser && !userData) {
-            console.log(userData)
-            if (!inOnboardingStackGroup) {
-                router.replace('/(onboard)');
-            }
-        } else if (firebaseUser && userData) {
-
-            if (inAuthGroup || inOnboardingStackGroup || inTabs) {
-                if (userData.role === 'ADMIN') {
-                    router.replace('/(admin)')
-
-                } else {
-                    if (!inTabs) {
-                        router.replace('/(tabs)')
-                    }
-                }
-            }
+    if (!firebaseUser && !inAuthGroup) {
+      if (!inAuthGroup) {
+        router.replace("/(auth)/login");
+      }
+    } else if (firebaseUser && !userData) {
+      console.log(userData);
+      if (!inOnboardingStackGroup) {
+        router.replace("/(onboard)");
+      }
+    } else if (firebaseUser && userData) {
+      if (inAuthGroup || inOnboardingStackGroup || inTabs) {
+        if (userData.role === "ADMIN") {
+          router.replace("/(admin)");
+        } else {
+          if (!inTabs) {
+            router.replace("/(tabs)");
+          }
         }
-
-    }, [firebaseUser, isDbLoading, segments, isFirebaseLoading, userData, router, navigationState?.key]);
-
-    useEffect(() => {
-        setColorScheme("dark");
-    }, []);
-
-
-
-
-    if (isDbLoading) {
-        return (
-            <View style={{ flex: 1, backgroundColor: 'black', justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator size="large" color="#E7872E" />
-            </View>
-        );
+      }
     }
   }, [
     firebaseUser,
     isDbLoading,
     segments,
     isFirebaseLoading,
-    dbUser,
+    userData,
     router,
     navigationState?.key,
   ]);
@@ -152,15 +126,16 @@ function RootLayoutNav() {
 
   if (isDbLoading) {
     return (
-        <>
-            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                <Button onPress={() => signOut(auth)}>Sing Out</Button>
-                <Slot />
+      <>
+        <ThemeProvider
+          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        >
+          <Button onPress={() => signOut(auth)}>Sing Out</Button>
+          <Slot />
 
-                <PortalHost />
-            </ThemeProvider>
-        </>
-
+          <PortalHost />
+        </ThemeProvider>
+      </>
     );
   }
 

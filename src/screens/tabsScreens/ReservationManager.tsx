@@ -13,7 +13,7 @@ type ReservationManagerProps = {
     isLoadingSession: boolean;
     reservation: any;
     session: ParkingSession | null;
-    bottomSheetRef: React.RefObject<BottomSheet>;
+    bottomSheetRef: React.RefObject<BottomSheet | null>;
     shouldSessionStart: boolean;
 };
 
