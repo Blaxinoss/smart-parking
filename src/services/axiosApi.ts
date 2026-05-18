@@ -1,6 +1,6 @@
+import { ngrok } from '@/constants/constants'
 import axios from 'axios'
 import { auth } from './firebaseConfig'
-import { ngrok } from '@/constants/constants'
 
 
 export const AxiosAPI = axios.create({

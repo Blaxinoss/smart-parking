@@ -12,9 +12,9 @@ import {
     ToolCase,
     User
 } from "lucide-react-native";
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
-import { useAdminAlerts, useResolveAlert } from "./useAdminApi";
+import { useAdminAlerts, useResolveAlert } from "../../services/useAdminApi";
 
 // Mapping Icons to Alert Types
 const AlertIcons: Record<string, React.ElementType> = {
@@ -30,6 +30,8 @@ const AlertIcons: Record<string, React.ElementType> = {
 
 export default function AlertsSection() {
     const { data: alerts, isLoading } = useAdminAlerts();
+    const [selected, setSelected] = useState<"total" | "pending" | "resolved">("total");
+
     const resolveAlert = useResolveAlert();
 
     const sorted = [...(alerts ?? [])].sort((a, b) => {
@@ -37,8 +39,21 @@ export default function AlertsSection() {
         const bRes = b.status === 'resolved' ? 1 : 0;
         return aRes - bRes;
     });
-    const reslovedLength = alerts?.filter(it => it.status === 'resolved').length
-    const UnreslovedLength = alerts?.filter(it => it.status === 'pending').length
+    const resolvedLength = alerts?.filter(it => it.status === "resolved").length ?? 0;
+    const unresolvedLength = alerts?.filter(it => it.status === "pending").length ?? 0;
+
+    const filteredData = useMemo(() => {
+        if (selected === "total") return sorted; // use sorted so order is preserved
+        return sorted.filter(it => it.status === selected); // keys already match: "pending" / "resolved"
+    }, [selected, sorted]);
+
+
+
+    const filters = [
+        { key: "total", label: `${sorted.length} total`, bg: "bg-white/10", border: "border-white/10", text: "text-main-50" },
+        { key: "pending", label: `${unresolvedLength} open`, bg: "bg-danger-700/20", border: "border-danger-700/30", text: "text-danger-100" },
+        { key: "resolved", label: `${resolvedLength} resolved`, bg: "bg-main-900/20", border: "border-main-900/30", text: "text-main-50" },
+    ] as const;
 
     const SeverityColorsBg: Record<string, string> = {
         critical: "rgba(255, 69, 58, 0.12)",
@@ -70,22 +85,31 @@ export default function AlertsSection() {
                 </View>
 
                 <View className="flex-row flex-wrap gap-2 mt-4">
-                    <View className="px-3 py-1.5 rounded-full bg-white/10 border border-white/10">
-                        <Text className="text-main-50 text-[10px] font-titillium_bold uppercase tracking-[0.2em]">{sorted.length} total</Text>
-                    </View>
-                    <View className="px-3 py-1.5 rounded-full bg-danger-700/20 border border-danger-700/30">
-                        <Text className="text-danger-100 text-[10px] font-titillium_bold uppercase tracking-[0.2em]">{reslovedLength} open</Text>
-                    </View>
-                    <View className="px-3 py-1.5 rounded-full bg-main-900/20 border border-main-900/30">
-                        <Text className="text-main-50 text-[10px] font-titillium_bold uppercase tracking-[0.2em]">{UnreslovedLength} resolved</Text>
-                    </View>
+                    {filters.map(({ key, label, bg, border, text }) => (
+                        <Pressable
+                            key={key}
+                            onPress={() => setSelected(key)}
+                            className={`px-3 py-1.5 rounded-full border ${selected === key
+                                ? "bg-white/20 border-white/40"  // active state
+                                : `${bg} ${border}`               // default state
+                                }`}
+                        >
+                            <Text className={`${text} text-[10px] font-titillium_bold uppercase tracking-[0.2em]`}>
+                                {label}
+                            </Text>
+                        </Pressable>
+                    ))}
                 </View>
+
             </View>
             {isLoading ? (
                 <ActivityIndicator color="#E7872E" style={{ marginTop: 40 }} />
             ) : (
                 <FlatList
-                    data={sorted}
+                    data={filteredData}
+                    initialNumToRender={10}
+                    maxToRenderPerBatch={10}
+                    windowSize={5}
                     keyExtractor={(item) => item._id}
                     contentContainerStyle={{ paddingBottom: 100 }}
                     renderItem={({ item }: { item: IAlert }) => {

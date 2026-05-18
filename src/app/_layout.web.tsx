@@ -26,10 +26,7 @@ export {
     ErrorBoundary
 } from 'expo-router';
 
-export const unstable_settings = {
-    // Ensure that reloading on `/modal` keeps a back button present.
-    initialRouteName: '(admin)',
-};
+
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -85,40 +82,55 @@ function RootLayoutNav() {
 
     const segments = useSegments();
     const { firebaseUser, isFirebaseLoading } = useAuth();
-    const { data: dbUser, isLoading: isDbLoading } = useUser();
+    const { data: userData, isLoading: isDbLoading, isFetched } = useUser();
     const navigationState = useRootNavigationState();
+    const inAuthGroup = segments[0] === '(auth)';
+    const inOnboardingStackGroup = segments[0] === '(onboard)';
+    const inTabs = segments[0] === '(tabs)';
 
     useEffect(() => {
 
-        const inAuthGroup = segments[0] === '(auth)';
-        const inOnboardingStackGroup = segments[0] === '(onboard)';
-
-        if (isFirebaseLoading || !navigationState?.key || isDbLoading) return;
 
 
+
+        if (isFirebaseLoading || !navigationState?.key) return;
+
+        if (firebaseUser && isDbLoading) return;
+
+        if (firebaseUser && !isFetched && !userData) return;
 
         if (!firebaseUser && !inAuthGroup) {
             if (!inAuthGroup) {
                 router.replace('/(auth)/login');
             }
 
-        } else if (firebaseUser && !dbUser) {
+        } else if (firebaseUser && !userData) {
+            console.log(userData)
             if (!inOnboardingStackGroup) {
                 router.replace('/(onboard)');
             }
-        } else if (firebaseUser && dbUser) {
-            if (inAuthGroup || inOnboardingStackGroup) {
-                router.replace('/(admin)')
+        } else if (firebaseUser && userData) {
+
+            if (inAuthGroup || inOnboardingStackGroup || inTabs) {
+                if (userData.role === 'ADMIN') {
+                    router.replace('/(admin)')
+
+                } else {
+                    if (!inTabs) {
+                        router.replace('/(tabs)')
+                    }
+                }
             }
         }
 
-
-    }, [firebaseUser, isDbLoading, segments, isFirebaseLoading, dbUser, router, navigationState?.key]);
-
+    }, [firebaseUser, isDbLoading, segments, isFirebaseLoading, userData, router, navigationState?.key]);
 
     useEffect(() => {
         setColorScheme("dark");
     }, []);
+
+
+
 
     if (isDbLoading) {
         return (
@@ -132,13 +144,12 @@ function RootLayoutNav() {
     return (
         <>
             <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                <Button onPress={() => signOut(auth)}></Button>
+                <Button onPress={() => signOut(auth)}>Sing Out</Button>
                 <Slot />
 
                 <PortalHost />
             </ThemeProvider>
         </>
-
 
     );
 }

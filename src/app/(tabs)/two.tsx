@@ -13,7 +13,7 @@ import {
   WalletCards,
   XCircle
 } from 'lucide-react-native';
-import { useMemo, useState } from 'react';
+import { useState } from 'react'; // useMemo removed for React Compiler
 import {
   ActivityIndicator,
   RefreshControl,
@@ -82,9 +82,7 @@ function StatCard({
   accent?: string;
 }) {
   return (
-    <View
-      className="flex-1 rounded-2xl border border-garage-700 bg-garage-900 p-3 gap-1"
-    >
+    <View className="flex-1 rounded-2xl border border-garage-700 bg-garage-900 p-3 gap-1">
       <View className="flex-row items-center gap-1.5">
         <Icon size={13} color={accent} />
         <StyledText className="text-garage-500 text-[10px] uppercase">{label}</StyledText>
@@ -220,7 +218,7 @@ function PaymentCard({ payment }: { payment: any }) {
           >
             <meta.Icon size={11} color={meta.color} />
             <StyledText className="text-[11px] font-titillium-bold" style={{ color: meta.color }}>
-              {payment.transactionStatus}
+              {payment.transactionStatus || 'UNSPECIFIED'}
             </StyledText>
           </View>
         </View>
@@ -268,54 +266,53 @@ export default function HistoryScreen() {
   const [mode, setMode] = useState<ViewMode>('sessions');
   const [search, setSearch] = useState('');
 
-  const sessionsQuery = useUserSessionsHistory();
-  const paymentsQuery = usePaymentHistory();
+  // 1. Destructure React Query hooks
+  const {
+    data: sessionsData = [],
+    isLoading: isSessionsLoading,
+    isRefetching: isSessionsRefetching,
+    refetch: refetchSessions
+  } = useUserSessionsHistory();
 
-  const isBusy = sessionsQuery.isLoading || paymentsQuery.isLoading;
-  const isRefreshing = sessionsQuery.isRefetching || paymentsQuery.isRefetching;
+  const {
+    data: paymentsData = [],
+    isLoading: isPaymentsLoading,
+    isRefetching: isPaymentsRefetching,
+    refetch: refetchPayments
+  } = usePaymentHistory();
 
-  const sortedSessions = useMemo(() => {
-    const values = sessionsQuery.data || [];
-    const q = search.trim().toLowerCase();
-    return [...values]
-      .filter((s) =>
-        !q ||
-        s.slotId.toLowerCase().includes(q) ||
-        String(s.id).includes(q) ||
-        String(s.vehicleId).includes(q) ||
-        s.status.toLowerCase().includes(q)
-      )
-      .sort((a, b) => +new Date(b.entryTime) - +new Date(a.entryTime));
-  }, [sessionsQuery.data, search]);
+  const isBusy = isSessionsLoading || isPaymentsLoading;
+  const isRefreshing = isSessionsRefetching || isPaymentsRefetching;
 
-  const sortedPayments = useMemo(() => {
-    const values = paymentsQuery.data || [];
-    const q = search.trim().toLowerCase();
-    return [...values]
-      .filter((p) =>
-        !q ||
-        String(p.id).includes(q) ||
-        (p.paymentMethod || '').toLowerCase().includes(q) ||
-        p.transactionStatus.toLowerCase().includes(q)
-      )
-      .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
-  }, [paymentsQuery.data, search]);
+  // 2. React Compiler replaces useMemo - we just write derived state directly
+  const searchQuery = search.trim().toLowerCase();
 
-  const sessionsCompleted = useMemo(
-    () =>
-      (sessionsQuery.data || []).filter(
-        (s) => s.status === ParkingSessionStatus.COMPLETED
-      ).length,
-    [sessionsQuery.data]
-  );
+  const sortedSessions = [...sessionsData]
+    .filter((s) =>
+      !searchQuery ||
+      (s.slotId || '').toLowerCase().includes(searchQuery) ||
+      String(s.id).includes(searchQuery) ||
+      String(s.vehicleId).includes(searchQuery) ||
+      (s.status || '').toLowerCase().includes(searchQuery)
+    )
+    .sort((a, b) => +new Date(b.entryTime) - +new Date(a.entryTime));
 
-  const totalSpent = useMemo(
-    () =>
-      (paymentsQuery.data || []).reduce(
-        (sum, p) => sum + Number(p.amount || 0),
-        0
-      ),
-    [paymentsQuery.data]
+  const sortedPayments = [...paymentsData]
+    .filter((p) =>
+      !searchQuery ||
+      String(p.id).includes(searchQuery) ||
+      (p.paymentMethod || '').toLowerCase().includes(searchQuery) ||
+      (p.transactionStatus || '').toLowerCase().includes(searchQuery) // Protected against null
+    )
+    .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
+
+  const sessionsCompleted = sessionsData.filter(
+    (s) => s.status === ParkingSessionStatus.COMPLETED
+  ).length;
+
+  const totalSpent = paymentsData.reduce(
+    (sum, p) => sum + Number(p.amount || 0),
+    0
   );
 
   if (isBusy) {
@@ -334,7 +331,6 @@ export default function HistoryScreen() {
         paddingTop: 20,
         paddingBottom: 130,
         marginTop: 25,
-
         gap: 12,
       }}
       showsVerticalScrollIndicator={false}
@@ -342,8 +338,8 @@ export default function HistoryScreen() {
         <RefreshControl
           refreshing={isRefreshing}
           onRefresh={() => {
-            sessionsQuery.refetch();
-            paymentsQuery.refetch();
+            refetchSessions();
+            refetchPayments();
           }}
           tintColor={Colors.main[900]}
         />
@@ -382,7 +378,7 @@ export default function HistoryScreen() {
         <StatCard
           Icon={ReceiptText}
           label="Payments"
-          value={paymentsQuery.data?.length || 0}
+          value={paymentsData.length}
           accent={Colors.garage[400]}
         />
       </View>
@@ -410,8 +406,7 @@ export default function HistoryScreen() {
             onPress={() => setMode(m)}
             className="flex-1 py-2.5 rounded-xl items-center"
             style={{
-              backgroundColor:
-                mode === m ? Colors.main[900] : 'transparent',
+              backgroundColor: mode === m ? Colors.main[900] : 'transparent',
             }}
             activeOpacity={0.8}
           >

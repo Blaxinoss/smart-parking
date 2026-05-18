@@ -1,6 +1,7 @@
-import { IAlert, IParkingSlot, SlotStatus } from "@/constants/types";
+import { IAlert, IParkingSlot, PaymentTransaction, SlotStatus, TransactionStatus, User, Vehicle } from "@/constants/types";
 import { AxiosAPI } from "@/services/axiosApi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import Toast from "react-native-toast-message";
 
 type ToastOpts = { type?: string; text1?: string; text2?: string };
@@ -60,8 +61,12 @@ export type AdminUser = {
     email: string;
     role: "USER" | "ADMIN";
     phone?: string;
+    address?: string;
+    NationalID?: string;
+    licenseNumber?: string | null;
+    licenseExpiry?: string | null;
     debt?: number;
-    notificationsEnabled?: boolean;
+    notificationAllowed?: boolean;
 };
 
 export type ParkingSlot = {
@@ -78,6 +83,9 @@ export type ParkingSession = {
     endTime?: string;
     totalCost?: number;
     status: "ACTIVE" | "COMPLETED" | "CANCELLED";
+    user?: User;
+    vehicle?: Vehicle;
+    paymentTransaction?: PaymentTransaction[];
 };
 
 export type Reservation = {
@@ -87,24 +95,19 @@ export type Reservation = {
     startTime: string;
     endTime: string;
     status: "PENDING" | "CONFIRMED" | "CANCELLED";
+    user?: { name: string; email: string };
+    vehicle?: { plate: string };
 };
 
-export type Transaction = {
-    id: number;
-    userId: string;
-    amount: number;
-    type: "PAYMENT" | "REFUND" | "DEBT";
-    createdAt: string;
-};
 
 
 export type Device = {
-    id: string;
+    _id: string;
     deviceId: string;
     name: string;
     type: "SENSOR" | "CAMERA" | "GATE";
     status: "online" | "offline";  // ✅ lowercase يتطابق مع الـ model
-    slotId?: string;
+    slotId?: string | null;
     lastSeen?: string;
     cpuTemp?: number;
 };
@@ -117,6 +120,10 @@ export type Gate = {
     createdAt: string;
     updatedAt: string;
 };
+export type CreateUserPayload = Omit<AdminUser, "id" | "debt"> & {
+    password?: string;
+    National_Id: string;
+}
 
 // ─── USERS ────────────────────────────────────────────────────────────────────
 export const useAdminUsers = () =>
@@ -125,9 +132,10 @@ export const useAdminUsers = () =>
 export const useCreateUser = () => {
     const qc = useQueryClient();
     return useMutation({
-        mutationFn: (data: Partial<AdminUser>) => AxiosAPI.post<ApiListResponse<AdminUser>>("/admin/users", data).then(r => r.data.data),
+        mutationFn: (data: CreateUserPayload) =>
+            AxiosAPI.post<ApiListResponse<AdminUser>>("/admin/users/create_user", data).then(r => r.data.data),
         onSuccess: () => { qc.invalidateQueries({ queryKey: ["adminUsers"] }); showToast({ type: "success", text1: "User created" }); },
-        onError: (e: Error) => showToast({ type: "error", text1: e.message }),
+        onError: (e: AxiosError) => showToast({ type: "error", text1: e.message, text2: (e.response?.data as any)?.error }),
     });
 };
 
@@ -137,7 +145,7 @@ export const useUpdateUser = () => {
         mutationFn: ({ id, ...data }: Partial<AdminUser> & { id: string }) =>
             AxiosAPI.patch<ApiListResponse<AdminUser>>(`/admin/users/${id}`, data).then(r => r.data.data),
         onSuccess: () => { qc.invalidateQueries({ queryKey: ["adminUsers"] }); showToast({ type: "success", text1: "User updated" }); },
-        onError: (e: Error) => showToast({ type: "error", text1: e.message }),
+        onError: (e: AxiosError) => showToast({ type: "error", text1: e.message, text2: (e.response?.data as any)?.error }),
     });
 };
 
@@ -146,7 +154,7 @@ export const useDeleteUser = () => {
     return useMutation({
         mutationFn: (id: string) => AxiosAPI.delete<ApiListResponse<unknown>>(`/admin/users/${id}`).then(r => r.data.data),
         onSuccess: () => { qc.invalidateQueries({ queryKey: ["adminUsers"] }); showToast({ type: "success", text1: "User deleted" }); },
-        onError: (e: Error) => showToast({ type: "error", text1: e.message }),
+        onError: (e: AxiosError) => showToast({ type: "error", text1: e.message, text2: (e.response?.data as any)?.error }),
     });
 };
 
@@ -159,7 +167,7 @@ export const useCreateSlot = () => {
     return useMutation({
         mutationFn: (data: Partial<IParkingSlot>) => AxiosAPI.post<ApiListResponse<any>>("/admin/slots", data).then(r => r.data.data),
         onSuccess: () => { qc.invalidateQueries({ queryKey: ["adminSlots"] }); showToast({ type: "success", text1: "Slot created" }); },
-        onError: (e: Error) => showToast({ type: "error", text1: e.message }),
+        onError: (e: AxiosError) => showToast({ type: "error", text1: e.message, text2: (e.response?.data as any)?.error }),
     });
 };
 
@@ -180,7 +188,7 @@ export const useUpdateSlot = () => {
             qc.invalidateQueries({ queryKey: ["adminSlots"] });
             showToast({ type: "success", text1: "Slot updated" });
         },
-        onError: (e: Error) => showToast({ type: "error", text1: e.message }),
+        onError: (e: AxiosError) => showToast({ type: "error", text1: e.message, text2: (e.response?.data as any)?.error }),
     });
 }
 
@@ -189,7 +197,7 @@ export const useDeleteSlot = () => {
     return useMutation({
         mutationFn: (id: string) => AxiosAPI.delete<ApiListResponse<IParkingSlot>>(`/admin/slots/${id}`).then(r => r.data.data),
         onSuccess: () => { qc.invalidateQueries({ queryKey: ["adminSlots"] }); showToast({ type: "success", text1: "Slot deleted" }); },
-        onError: (e: Error) => showToast({ type: "error", text1: e.message }),
+        onError: (e: AxiosError) => showToast({ type: "error", text1: e.message, text2: (e.response?.data as any)?.error }),
     });
 };
 
@@ -197,12 +205,47 @@ export const useDeleteSlot = () => {
 export const useAdminSessions = () =>
     useQuery({ queryKey: ["adminSessions"], queryFn: () => getAdminData<ParkingSession[]>("/admin/sessions") });
 
-export const useDeleteSession = () => {
+export const useForceCancel = () => {
     const qc = useQueryClient();
     return useMutation({
-        mutationFn: (id: number) => AxiosAPI.delete<ApiListResponse<unknown>>(`/admin/sessions/${id}`).then(r => r.data.data),
-        onSuccess: () => { qc.invalidateQueries({ queryKey: ["adminSessions"] }); showToast({ type: "success", text1: "Session deleted" }); },
-        onError: (e: Error) => showToast({ type: "error", text1: e.message }),
+        mutationFn: (id: number) =>
+            AxiosAPI.post(`/admin/sessions/${id}/force-cancel`).then(r => r.data),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ["adminSessions"] });
+            showToast({ type: "success", text1: "Session cancelled" });
+        },
+        onError: (e: AxiosError) =>
+            showToast({ type: "error", text1: (e.response?.data as any)?.error }),
+    });
+
+
+};
+
+export const useEditSession = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, data }: { id: number; data: any }) =>
+            AxiosAPI.put(`/admin/sessions/${id}`, data).then(r => r.data),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ["adminSessions"] });
+            showToast({ type: "success", text1: "Session updated successfully" });
+        },
+        onError: (e: any) =>
+            showToast({ type: "error", text1: e.response?.data?.error || "Error updating session" }),
+    });
+};
+
+export const useCompleteCashPayment = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (id: number) =>
+            AxiosAPI.post(`/admin/sessions/${id}/complete-cash-payment`).then(r => r.data),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ["adminSessions"] });
+            showToast({ type: "success", text1: "Cash payment confirmed" });
+        },
+        onError: (e: AxiosError) =>
+            showToast({ type: "error", text1: (e.response?.data as any)?.error }),
     });
 };
 
@@ -210,19 +253,65 @@ export const useDeleteSession = () => {
 export const useAdminReservations = () =>
     useQuery({ queryKey: ["adminReservations"], queryFn: () => getAdminData<Reservation[]>("/admin/reservations") });
 
-export const useDeleteReservation = () => {
+export const useCancelReservation = () => {
     const qc = useQueryClient();
     return useMutation({
-        mutationFn: (id: number) => AxiosAPI.delete<ApiListResponse<unknown>>(`/admin/reservations/${id}`).then(r => r.data.data),
-        onSuccess: () => { qc.invalidateQueries({ queryKey: ["adminReservations"] }); showToast({ type: "success", text1: "Reservation deleted" }); },
-        onError: (e: Error) => showToast({ type: "error", text1: e.message }),
+        mutationFn: (id: number) =>
+            AxiosAPI.put<ApiListResponse<Reservation>>(`/admin/reservations/${id}`, {
+                status: "CANCELLED",
+            }).then(r => r.data.data),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ["adminReservations"] });
+            showToast({ type: "success", text1: "Reservation cancelled" });
+        },
+        onError: (e: AxiosError) => showToast({ type: "error", text1: e.message, text2: (e.response?.data as any)?.error }),
     });
 };
 
+export const useUpdateReservation = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, ...data }: Partial<Reservation> & { id: number }) =>
+            AxiosAPI.put<ApiListResponse<Reservation>>(`/admin/reservations/${id}`, data).then(r => r.data.data),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ["adminReservations"] });
+            showToast({ type: "success", text1: "Reservation updated" });
+        },
+        onError: (e: AxiosError) => showToast({ type: "error", text1: e.message, text2: (e.response?.data as any)?.error }),
+    });
+};
 // ─── TRANSACTIONS ─────────────────────────────────────────────────────────────
 export const useAdminTransactions = () =>
-    useQuery({ queryKey: ["adminTransactions"], queryFn: () => getAdminData<Transaction[]>("/admin/transactions") });
+    useQuery({ queryKey: ["adminTransactions"], queryFn: () => getAdminData<PaymentTransaction[]>("/admin/transactions") });
 
+// إضافة الـ Mutation الخاص بتغيير الحالة (مثلاً لتأكيد الدفع وفتح البوابة)
+export const useUpdateTransactionStatus = () => {
+    const qc = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, status }: { id: number; status: TransactionStatus }) =>
+            AxiosAPI.patch<{ success: boolean; data: PaymentTransaction }>(
+                `/admin/transactions/${id}/status`,
+                { transactionStatus: status }
+            ).then(r => r.data.data),
+        onSuccess: (_, variables) => {
+            qc.invalidateQueries({ queryKey: ["adminTransactions"] });
+
+            const actionMsg = variables.status === TransactionStatus.COMPLETED
+                ? "Payment Confirmed & Gate Opened!"
+                : `Transaction marked as ${variables.status}`;
+
+            showToast({ type: "success", text1: actionMsg });
+        },
+        onError: (e: AxiosError) => {
+            showToast({
+                type: "error",
+                text1: "Failed to update transaction",
+                text2: (e.response?.data as any)?.message || e.message
+            });
+        },
+    });
+};
 // ─── ALERTS ───────────────────────────────────────────────────────────────────
 export const useAdminAlerts = () =>
     useQuery({ queryKey: ["adminAlerts"], queryFn: () => getAdminData<IAlert[]>("/admin/alerts") });
@@ -232,7 +321,7 @@ export const useResolveAlert = () => {
     return useMutation({
         mutationFn: (id: string) => AxiosAPI.patch<ApiListResponse<IAlert>>(`/admin/alerts/${id}/resolve`).then(r => r.data.data),
         onSuccess: () => { qc.invalidateQueries({ queryKey: ["adminAlerts"] }); showToast({ type: "success", text1: "Alert resolved" }); },
-        onError: (e: Error) => showToast({ type: "error", text1: e.message }),
+        onError: (e: AxiosError) => showToast({ type: "error", text1: e.message, text2: (e.response?.data as any)?.error }),
     });
 };
 
@@ -247,10 +336,10 @@ export const useAdminDevices = () =>
 export const useCreateDevice = () => {
     const qc = useQueryClient();
     return useMutation({
-        mutationFn: (data: Omit<Device, "id" | "deviceId" | "lastSeen" | "cpuTemp">) =>
+        mutationFn: (data: Omit<Device, "_id" | "deviceId" | "lastSeen" | "cpuTemp">) =>
             AxiosAPI.post<ApiListResponse<Device>>("/admin/devices", data).then(r => r.data.data),
         onSuccess: () => { qc.invalidateQueries({ queryKey: ["adminDevices"] }); showToast({ type: "success", text1: "Device created" }); },
-        onError: (e: Error) => showToast({ type: "error", text1: e.message }),
+        onError: (e: AxiosError) => showToast({ type: "error", text1: e.message, text2: (e.response?.data as any)?.error }),
     });
 };
 export const useUpdateDevice = () => {
@@ -259,7 +348,7 @@ export const useUpdateDevice = () => {
         mutationFn: ({ id, ...data }: Omit<Partial<Device>, "id"> & { id: string }) =>
             AxiosAPI.patch<ApiListResponse<Device>>(`/admin/devices/${id}`, data).then(r => r.data.data),
         onSuccess: () => { qc.invalidateQueries({ queryKey: ["adminDevices"] }); showToast({ type: "success", text1: "Device updated" }); },
-        onError: (e: Error) => showToast({ type: "error", text1: e.message }),
+        onError: (e: AxiosError) => showToast({ type: "error", text1: e.message, text2: (e.response?.data as any)?.error }),
     });
 };
 
@@ -269,7 +358,7 @@ export const useDeleteDevice = () => {
         mutationFn: (id: string) =>
             AxiosAPI.delete<ApiListResponse<Device>>(`/admin/devices/${id}`).then(r => r.data.data),
         onSuccess: () => { qc.invalidateQueries({ queryKey: ["adminDevices"] }); showToast({ type: "success", text1: "Device deleted" }); },
-        onError: (e: Error) => showToast({ type: "error", text1: e.message }),
+        onError: (e: AxiosError) => showToast({ type: "error", text1: e.message, text2: (e.response?.data as any)?.error }),
     });
 };
 
@@ -285,6 +374,27 @@ export const useUpdateGate = () => {
         mutationFn: ({ id, ...data }: Partial<Gate> & { id: string }) =>
             AxiosAPI.patch<ApiListResponse<Gate>>(`/admin/gates/${id}`, data).then(r => r.data.data),
         onSuccess: () => { qc.invalidateQueries({ queryKey: ["adminGates"] }); showToast({ type: "success", text1: "Gate updated" }); },
-        onError: (e: Error) => showToast({ type: "error", text1: e.message }),
+        onError: (e: AxiosError) => showToast({ type: "error", text1: e.message, text2: (e.response?.data as any)?.error }),
+    });
+};
+
+export const useForceGateCommand = () => {
+    const qc = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ command, userId, gateId, type }: {
+            command: "OPEN" | "CLOSE";
+            gateId: string;
+            reason: "ADMIN_OVERRIDE",
+            type: "enter" | "exit";
+            userId?: string;
+        }) => AxiosAPI.post(`/admin/gates/force-command`, { command, userId, gateId, type }).then(r => r.data),
+        onSuccess: (_, variables) => {
+            showToast({ type: "success", text1: `Gate ${variables.command} command sent` });
+            qc.invalidateQueries({ queryKey: ["adminGates"] });
+        },
+        onError: (e: AxiosError) =>
+            showToast({ type: "error", text1: e.message, text2: (e.response?.data as any)?.error }),
+
     });
 };

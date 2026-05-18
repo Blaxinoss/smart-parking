@@ -1,9 +1,12 @@
 import Colors from "@/constants/Colors";
+import { auth } from "@/services/firebaseConfig";
+import { signOut } from "@/services/signout";
 import {
     BellRing,
     CalendarClock,
     Cpu,
     CreditCard,
+    DoorClosed,
     DoorOpen,
     LayoutDashboard,
     ParkingSquare,
@@ -23,13 +26,6 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AlertsSection from "./AlertsSection";
-import DevicesSection from "./DevicesSection";
-import GatesSection from "./GatesSection";
-import ReservationsSection from "./ReservationsSection";
-import SessionsSection from "./SessionsSection";
-import SlotsSection from "./SlotsSection";
-import TransactionsSection from "./TransactionsSection";
 import {
     useAdminAlerts,
     useAdminDevices,
@@ -39,7 +35,14 @@ import {
     useAdminSlots,
     useAdminTransactions,
     useAdminUsers,
-} from "./useAdminApi";
+} from "../../services/useAdminApi";
+import AlertsSection from "./AlertsSection";
+import DevicesSection from "./DevicesSection";
+import GatesSection from "./GatesSection";
+import ReservationsSection from "./ReservationsSection";
+import SessionsSection from "./SessionsSection";
+import SlotsSection from "./SlotsSection";
+import TransactionsSection from "./TransactionsSection";
 import UsersSection from "./UsersSection";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -175,6 +178,8 @@ export default function AdminDashboard() {
                 <QuickAction icon={<UserPlus size={16} color="#64a0ff" />} label="Add user" tint="#64a0ff" onPress={() => setActiveSection("users")} />
                 <QuickAction icon={<BellRing size={16} color="#F97C7C" />} label="Alerts" tint="#F97C7C" onPress={() => setActiveSection("alerts")} badge={unresolvedAlerts > 0 ? unresolvedAlerts : undefined} />
                 <QuickAction icon={<DoorOpen size={16} color="#50c882" />} label="Gates" tint="#50c882" onPress={() => setActiveSection("gates")} />
+                <QuickAction icon={<DoorClosed size={16} color="#50c882" />} label="Sign out" tint="#50c882" onPress={() => signOut(auth)} />
+
             </View>
 
             {/* Management list */}
@@ -198,6 +203,24 @@ export default function AdminDashboard() {
                 count={slots?.length}
                 onPress={() => setActiveSection("slots")}
             />
+
+            <DarkSectionRow
+                icon={<CalendarClock size={17} color="#f472b6" />}
+                tint="#f472b6"
+                title="Reservations"
+                subtitle="Upcoming and pending"
+                count={reservations?.length}
+                onPress={() => setActiveSection("reservations")}
+            />
+            <DarkSectionRow
+                icon={<CreditCard size={17} color="#34d399" />}
+                tint="#34d399"
+                title="Transactions"
+                subtitle="Payments and refunds"
+                count={transactions?.length}
+                onPress={() => setActiveSection("transactions")}
+            />
+
             <DarkSectionRow
                 icon={<Timer size={17} color="#50c882" />}
                 tint="#50c882"
